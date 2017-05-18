@@ -15,6 +15,23 @@ space show
 
 +Another state of the memory game.>file://figures/memoryExample1.png|width=70|label=figmemoryExample1+
 
+!! Getting in
+
+In Pharo 6.0 with Sources V60 and stable vm:
+
+[[[
+Metacello new
+    baseline: 'Bloc';
+    repository: 'github://pharo-graphics/Bloc/src';
+    load: #core.
+]]]
+
+[[[
+Metacello new
+    baseline: 'BlocTutorials';
+    repository: 'github://pharo-graphics/Tutorials/src';
+    load
+]]]
 
 !! Memory Game Model
 
