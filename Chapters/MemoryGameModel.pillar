@@ -1,0 +1,20 @@
+!! Memory game
+
+[[[
+space := BlSpace new.
+space extent: 420@420.
+
+game := MgdGameModel numbers.
+grid := MgdGameElement new.
+grid memoryGame: game.
+space root addChild: grid.
+space show 
+]]]
+
++A state of the memory game.>file://figures/memoryExample1.png|width=70|label=figmemoryExample1+
+
++Another state of the memory game.>file://figures/memoryExample1.png|width=70|label=figmemoryExample1+
+
+
+!! Memory Game Model
+
