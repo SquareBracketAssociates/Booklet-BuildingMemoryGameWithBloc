@@ -1,23 +1,60 @@
-!! Memory game
+!! Objectives of this book
+
+Bloc's deign is getting stable and this book is a first tutorial on Bloc.
+Some elements may change such as the name of certain methods, but most of these changes
+will be minor.
+
+In this tutorial you will be will a memory game. We provide the model and focus on the UI part. 
+
+
+!!! Memory game
+
+Let us have a look at what we want to build with you: a simple Memory game. A memory game is a game where the players should remember revealed cards and find pairs of them.
+For now we will focus on the game core logic and ui: the board and the card. 
+
+Figure *@figmemoryExample0* shows the game after the first selection of two cards. Card face down are represented with a cross and revealed cards are just showing a number.
+
++The game at the beginning: faced down card are represented with a cross and visible card with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
+
+
+Here is the code that we will execute to build and launch the game core.
 
 [[[
-space := BlSpace new.
-space extent: 420@420.
-
+	
 game := MgdGameModel numbers.
 grid := MgdGameElement new.
-grid memoryGame: game.
+grid memoryGame: game.	
+
+space := BlSpace new.
+space extent: 420@420.
 space root addChild: grid.
 space show 
 ]]]
 
-+A state of the memory game.>file://figures/memoryExample1.png|width=70|label=figmemoryExample1+
+- We create a grame model and ask to get numbers associated with the cards.
+- Then we create a graphical game element
+- We assign the model of the game to the UI. 
+- Finally we create a graphical space in which we place the game ui and we launch it. 
+ 
+ 
++Another state of the memory game after the identification of two pairs.>file://figures/memoryExample1.png|width=60|label=figmemoryExample1+
 
-+Another state of the memory game.>file://figures/memoryExample1.png|width=70|label=figmemoryExample1+
+!!! Getting in started
 
-!! Getting in
+This tutorial is for Pharo 60 with the latest Pharo60 Virtual machine.
+You can get them at the following address
 
-In Pharo 6.0 with Sources V60 and stable vm:
+[[[
+http://get.pharo.org/60+vm
+]]]
+
+Execute this on unix system:
+
+[[[
+wget -O- get.pharo.org/60+vm | bash
+]]]
+
+To load Bloc execute the following snippet:
 
 [[[
 Metacello new
@@ -26,6 +63,17 @@ Metacello new
     load: #core.
 ]]]
 
+
+
+!! Game model insights
+To help you focus on the building of graphical elements, we developed a game model. 
+This game model will be used as a model in the typical Model View architecture.
+As we will see later the model will never communicate directly with the view elements but vai announcements. On the other side, the graphic elements are communicating directly with the model.
+
+!!! Loading the Memory game model
+
+To get you up to speed we designed a game model that you should load: 
+
 [[[
 Metacello new
     baseline: 'BlocTutorials';
@@ -33,5 +81,125 @@ Metacello new
     load
 ]]]
 
-!! Memory Game Model
+
+!!! Reviewing the card model
+
+Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not and an announcer to emit change state. This object could also be a subclass of Model which already provide announcer management. 
+
+[[[
+Object subclass: #MgdCardModel
+	instanceVariableNames: 'symbol flipped announcer'
+	classVariableNames: ''
+	package: 'Bloc-MemoryGame-Demo-Model'
+]]]
+
+[[[
+MgdCardModel >> symbol: aCharacter
+	symbol := aCharacter
+]]]
+
+More interesting is the ==flip== and ==flipped== methods.
+[[[
+MgdCardModel >> flip
+	"Flip the card on the other side (toggle flipped state)"
+	self flipped: self flipped not
+]]]
+
+[[[
+MgdCardModel >> flipped: aBoolean
+	flipped := aBoolean.
+	self notifyFlipped
+]]]
+
+The notification is implementing as follows in the ==notifyFlipped== method. 
+
+[[[
+MgdCardModel >> notifyFlipped
+	"Notify all observers that my flipped state was changed (from flipped to not or the other way around)"
+
+	self announcer announce: MgCardFlippedAnnouncement new
+]]]
+
+The final aspect worth mentioning is the method ==disappear==.
+
+[[[
+MgdCardModel >> disappear
+
+	self notifyDisappear
+]]]
+
+
+!!! Reviewing the game model
+
+The game model is simple: it keeps the tracks of the cards that are available and already removed. 
+
+[[[
+Object subclass: #MgdGameModel
+	instanceVariableNames: 'availableCards chosenCards'
+	classVariableNames: ''
+	package: 'Bloc-MemoryGame-Demo-Model'
+]]]
+
+We hardcode for now the size of the grid. 
+[[[
+MgdGameModel >> gridSize
+	"Return grid size, total amount of card is gridSize^2"
+	^ 4
+]]]
+
+[[[
+MgdGameModel >> initialize
+	super initialize.
+	availableCards := OrderedCollection new.
+	chosenCards := OrderedCollection new
+]]]
+
+The ==initializeForSymbols:== creates a list of cards from a list of characters and shuffle it. 
+
+[[[
+MgdGameModel >> initializeForSymbols: aCollectionOfCharacters
+	"Initialize game model with the  cards that a represented by character symbols taken from a given
+	collection of symbols.
+	Note, amount of characters must correspond to amount of possible card combinations
+	which is in fact = (total card count / how many card to match).
+	So, if grid size is 4, then total card count is 4^2 = 16. If player should match 2 cards,
+	then collection size must be 16 / 2 = 8"
+
+	self
+		assert: [ aCollectionOfCharacters size = (self cardsCount / self matchesCount) ]
+		description: [ 'Amount of characters must be equal to possible all combinations' ].
+	availableCards := (aCollectionOfCharacters asArray
+		collect:
+			[ :aSymbol | (1 to: self matchesCount) collect: [ :i | MgCardModel new symbol: aSymbol ] ])
+	flattened shuffled asOrderedCollection
+]]]
+
+The game logic is defined in the method ==chooseCard:== (which could be improved but this is not the point of this book). What is important is that this method is sending the message ==disappear== and ==flip== to the cards. 
+
+[[[
+MgdGameModel >> chooseCard: aMgCard
+	| allEqual |
+	(self chosenCards includes: aMgCard)
+		ifTrue: [ ^ self ].
+	(self availableCards includes: aMgCard)
+		ifFalse: [ ^ self ].
+	self chosenCards add: aMgCard.
+	aMgCard flipped: true.
+	allEqual := self chosenCards allSatisfy: [ :each | each = self chosenCards first ].
+	(self chosenCards size = self matchesCount and: [ allEqual ])
+		ifTrue: [ self availableCards removeAll: self chosenCards.
+			self chosenCards do: [ :each | each disappear ].
+			self chosenCards removeAll.
+			^ self ].
+	self chosenCards size > self matchesCount
+		ifTrue: [ self chosenCards allButLastDo: [ :each | each flip ].
+			self chosenCards removeAll.
+			self chosenCards add: aMgCard ]
+]]]
+
+!!! Ready 
+
+We are now ready to start building the game view.
+
+
 

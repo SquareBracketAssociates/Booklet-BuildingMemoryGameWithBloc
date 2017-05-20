@@ -1,1 +1,368 @@
-!! Building UI Elements
+!! Building card graphic elements
+
+
+!!! Card graphical element
+
+
+A graphic element is a subclass of the ==BlElement==. It simply has a reference to a card model.
+
+[[[
+BlElement subclass: #MgdCardElement
+	instanceVariableNames: 'card'
+	classVariableNames: ''
+	package: 'Bloc-MemoryGame-Demo-Elements'
+]]]
+
+
+[[[
+MgdCardElement >> backgroundColor
+	^ Color lightBlue
+]]]
+
+We mentioned the accessors since the setter will be place to hook registration for the communication between the model and the view.
+
+[[[
+MgdCardElement >> card
+	^ card
+]]]
+
+
+[[[
+MgdCardElement >> 	card: aMgCard
+		card := aMgCard.
+]]]
+
+We initialize it to get a
+[[[
+MgdCardElement >> 	initialize
+	super initialize.
+	self size: 80 @ 80.
+	self card: MgdCardModel new
+]]]
+
+!!! Starting to draw a card
+
+To define the visual properties of a graphic element we redefine the method ==drawPathOnSpartaCanvas:==.
+
+(This method will be renamed ==drawPathOn:== in the future).
+
+[[[
+MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
+
+	super drawPathOnSpartaCanvas: aCanvas.
+	aCanvas fill 
+		paint: self backgroundColor;
+		path: self boundsInLocal;
+		draw
+]]]
+
+Note that if we forget to send the message draw the canvas will be set but it will not display the result. 
+
+Now to see the result in Morphic we have to get a spartaForm as follows:
+[[[
+MgdRawCardElement new asSpartaForm
+]]]
+
+You can also use the the inspector as shown in Figure *@figInspecting0*. Here we create and inspect the graphic element and then we ask it form and look at it in the Morph pane (this is what the Preview pane is actually doing).
+
++A first extremely basic representation of face down card.>file://figures/Inspecting0.png|width=60|label=figInspecting0+
+
+
+!!! Improving the card visual 
+
+Instead of displaying a full rectangle, we want a better visual. 
+Bloc offers a shape factory. This shape factory returns shape path (lines, rectangle, ellipse, circle...) that can be passed to the canvas using the message ==path:==. Other shapes can be easily added. 
+
+For example with the following expression ==path: (aCanvas shape ellipse: self boundsInLocal)== we draw now a circle since the bounds of the receiver returns a square of 80. 
+
+[[[
+MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
+	
+	| radius |
+	super drawPathOnSpartaCanvas: aCanvas.
+	radius := 12.
+	aCanvas fill 
+		paint: self backgroundColor;
+		path: (aCanvas shape ellipse: self boundsInLocal);
+		draw
+]]]
+
+For our card we would like to have a rounded rectangle so we use the ==roundedRectangle:radii:== factory message.
+
+[[[
+MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
+	
+	| radius |
+	super drawPathOnSpartaCanvas: aCanvas.
+	radius := 12.
+	aCanvas fill 
+		paint: self backgroundColor;
+		path: (aCanvas shape roundedRectangle: (self boundsInLocal)
+		radii: (BlCornerRadii radius: 12));
+		draw
+]]]
+
+You should get then a visual aspect close to the one shown in Figure *@figrounded1*.
+
+
++A rounded card.>file://figures/CardRounded1.png|width=60|label=figrounded1+
+
+
+
+!!! Preparing flipping
+
+We define now two methods 
+
+[[[
+MgdCardElement >> drawBacksideOn: aCanvas
+	"nothing for now"
+]]]
+
+[[[
+MgdCardElement >> drawFlippedOnCanvas: aCanvas
+	"nothing for now"
+]]]
+
+And we refactor ==drawPathOnSpartaCanvas:== as follows: 
+we extract the common part into a separate method. 
+[[[
+MgdCardElement >> drawCommonOnCanvas: aCanvas
+	| radius |
+	super drawPathOnSpartaCanvas: aCanvas.
+	radius := 12.
+	aCanvas fill
+		paint: self backgroundColor;
+		path: (aCanvas shape roundedRectangle: self boundsInLocal radii: (BlCornerRadii radius: 12));
+		draw.
+]]]
+
+Finally, ==drawPathOnSpartaCanvas:== logic is at the same conceptual level. 
+
+[[[
+MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
+	super drawPathOnSpartaCanvas: aCanvas.
+	self drawCommonOnCanvas: aCanvas.
+	self card flipped
+		ifTrue: [ self drawFlippedOnCanvas: aCanvas ]
+		ifFalse: [ self drawBacksideOn: aCanvas ]
+]]]
+
+Now we are ready to implement the backside and flipped side
+
+!!! Adding a cross
+
+[[[
+MgdCardElement >> drawBacksideOn: aCanvas
+	aCanvas stroke
+		paint: Color paleBlue;
+		path: (aCanvas shape line: 0 @ 0 to: self extent);
+		draw
+]]]
+
+[[[
+MgdCardElement >> 
+]]]
+
++A rounded card with half of the cross.>file://figures/CardOneLine.png|width=60|label=figOneLIne+
+
+
+!!! Line within corners
+
+[[[
+MgdCardElement >> drawBacksideOn: aCanvas
+	| radiusOffset |
+	radiusOffset := 12 / Float pi.
+	aCanvas stroke
+		paint: Color gray;
+		width: 3;
+		path: (aCanvas shape line: radiusOffset @ radiusOffset to: self extent - radiusOffset);
+		draw
+]]]
+
+
+
+!!! Flipping visual
+
+Add later:
+
+[[[
+self card flipped
+	ifTrue: [ self drawFlippedSideOnSpartaCanvas: aCanvas ]
+	ifFalse: [ self drawBacksideOnSpartaCanvas: aCanvas ]
+]]]
+
+
+
+
+
+
+
+[[[
+MgRawCardElement >> drawBacksideOnSpartaCanvas: aCanvas
+	| radius radiusOffset |
+	
+	radius := self cornerRadius.
+	radiusOffset := radius/Float pi.
+	
+	aCanvas stroke
+		paint: Color paleBlue;
+		path: (aCanvas shape 
+			line: radiusOffset@radiusOffset 
+			to: (self width-radiusOffset)@(self height-radiusOffset));
+		draw.
+	aCanvas stroke
+		paint: Color paleBlue;
+		path: (aCanvas shape 
+			line: (self width-radiusOffset)@radiusOffset
+			to: radiusOffset@(self height-radiusOffset));
+		draw
+		
+	"aCanvas stroke
+		paint: Color paleBlue;
+		path: ((BlLine new
+			 from: radiusOffset@radiusOffset;
+			 to: (self width-radiusOffset)@(self height-radiusOffset))
+				buildPathOnSpartaCanvas: aCanvas within: self boundsInLocal);
+		draw.
+	aCanvas stroke
+		paint: Color paleBlue;
+		path: ((BlLine new
+			 from: (self width-radiusOffset)@radiusOffset;
+			 to: radiusOffset@(self height-radiusOffset))
+				buildPathOnSpartaCanvas: aCanvas within: self boundsInLocal);
+		draw.”
+]]]
+
+
+[[[
+MgRawCardElement >> drawFlippedSideOnSpartaCanvas: aCanvas
+	| font textPainter metrics baseline origin |
+	
+	font := aCanvas font
+		size: 50;
+		build.
+
+	textPainter := aCanvas text
+		font: font;
+		paint: Color white;
+		string: self card symbol asString.
+	
+	metrics := textPainter measure.
+	
+	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
+	baseline := origin - metrics textMetrics bounds origin.
+	
+	textPainter
+		baseline: baseline;
+]]]
+
+
+
+!!! Resetting the Universe
+Since Bloc is still under development, it may happen that the Universe has to be reinitialized. 
+
+[[[
+BlUniverse reset
+]]]
+
+
+!!!  MgSimpleCardElement
+[[[
+MgCardElement subclass: #MgSimpleCardElement
+	instanceVariableNames: 'face back'
+	classVariableNames: ‘'
+	package: 'Bloc-MemoryGame-Elements'
+
+
+MgSimpleCardElement >> initialize
+	super initialize.
+	
+	self geometry: (BlRectangle cornerRadius: self cornerRadius).
+	self background: self backgroundColor.
+	self layout: BlFrameLayout new.
+	
+	face := BlTextElement new.
+	face constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+	face visibility: BlVisibility hidden.
+	
+	back := BlElement new
+		constraintsDo: [ :c |
+			c horizontal matchParent.
+			c vertical matchParent ];
+		addChild: (BlLineElement new
+			border: (BlBorder paint: Color paleBlue width: 1);
+			fromAnchor: (BlGeometryStaticAnchor position: 0 @ 0);
+			toAnchor: (BlGeometryStaticAnchor position: 80 @ 80);
+			yourself);
+		addChild: (BlLineElement new
+			border: (BlBorder paint: Color paleBlue width: 1);
+			fromAnchor: (BlGeometryStaticAnchor position: 80 @ 0);
+			toAnchor: (BlGeometryStaticAnchor position: 0 @ 80);
+			yourself).
+		
+	self addChild: face.
+	self addChild: back
+]]]
+
+[[[
+MgSimpleCardElement >> onFlippedFace
+	super onFlippedFace.
+	
+	face visibility: BlVisibility visible.
+	back visibility: BlVisibility hidden.
+]]]
+
+[[[
+MgSimpleCardElement >> onFlippedBack
+	super onFlippedBack.
+	
+	face visibility: BlVisibility hidden.
+	back visibility: BlVisibility visible.
+]]]
+
+
+!!! Adding a board
+
+[[[
+BlElement subclass: #MgGameElement
+	instanceVariableNames: ''
+	classVariableNames: ''
+	package: ‘Bloc-MemoryGame-Elements'
+]]]
+
+[[[
+MgGameElement >> initialize
+	super initialize.
+	
+	self background: (BlBackground fill: Color gray darker).
+	
+	self layout: (BlGridLayout horizontal cellSpacing: 20).
+	self constraintsDo: [ :layoutConstraints |
+		layoutConstraints horizontal fitContent.
+		layoutConstraints vertical fitContent ]
+]]]
+
+[[[	
+MgGameElement >> newCardElement
+	^ MgSimpleCardElement new
+]]]
+
+[[[
+MgGameElement >> memoryGame: aMemoryGame
+
+	self layout columnCount: aMemoryGame gridSize.
+	
+	aMemoryGame availableCards do: [ :aCard |
+		self addChild: (self newCardElement
+			card: aCard;
+			addEventHandler: (self newCardEventListener
+				memoryGame: aMemoryGame)) ].
+]]]
+
+[[[
+MgGameElement >> newCardEventListener
+	^ MgCardEventListener new
+]]]
+

@@ -1,8 +1,31 @@
 !! Adding UI interaction
 
+[[[
+BlElementEventListener subclass: #MgCardEventListener
+	instanceVariableNames: 'memoryGame'
+	classVariableNames: ''
+	package: ‘Bloc-MemoryGame-Elements'
+]]]
+
+[[[
+MgCardEventListener >> memoryGame
+	^ memoryGame
+]]]
+
+[[[
+MgCardEventListener >> memoryGame: aMemoryGame
+	memoryGame := aMemoryGame
+]]]
+
+[[[
+MgCardEventListener >> clickEvent: anEvent
+	self memoryGame chooseCard: anEvent currentTarget card
+]]]
 
 
 !! Connecting the model to the UI
+
+Here we will show how to domain is communicating with the user interface: using announcements.
 
 
 !! Adding animation
