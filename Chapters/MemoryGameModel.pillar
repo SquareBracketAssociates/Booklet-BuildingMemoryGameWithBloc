@@ -201,5 +201,9 @@ MgdGameModel >> chooseCard: aMgCard
 
 We are now ready to start building the game view.
 
+Since Bloc is still under development, it may happen that the Universe has to be reinitialized. 
 
+[[[
+BlUniverse reset
+]]]
 

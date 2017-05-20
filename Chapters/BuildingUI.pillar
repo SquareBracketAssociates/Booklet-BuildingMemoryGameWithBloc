@@ -181,57 +181,34 @@ MgdCardElement >> drawBacksideOn: aCanvas
 
 
 
-!!! Flipping visual
 
-Add later:
+
+
+!!! Flipped side 
 
 [[[
-self card flipped
-	ifTrue: [ self drawFlippedSideOnSpartaCanvas: aCanvas ]
-	ifFalse: [ self drawBacksideOnSpartaCanvas: aCanvas ]
+MgRawCardElement >> drawFlippedSideOnSpartaCanvas: aCanvas
+	| font textPainter metrics baseline origin |
+	
+	font := aCanvas font
+		size: 50;
+		build.
+
+	textPainter := aCanvas text
+		font: font;
+		paint: Color white;
+		string: self card symbol asString.
+	
+	metrics := textPainter measure.
+	
+	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
+	baseline := origin - metrics textMetrics bounds origin.
+	
+	textPainter
+		baseline: baseline;
 ]]]
 
 
-
-
-
-
-
-[[[
-MgRawCardElement >> drawBacksideOnSpartaCanvas: aCanvas
-	| radius radiusOffset |
-	
-	radius := self cornerRadius.
-	radiusOffset := radius/Float pi.
-	
-	aCanvas stroke
-		paint: Color paleBlue;
-		path: (aCanvas shape 
-			line: radiusOffset@radiusOffset 
-			to: (self width-radiusOffset)@(self height-radiusOffset));
-		draw.
-	aCanvas stroke
-		paint: Color paleBlue;
-		path: (aCanvas shape 
-			line: (self width-radiusOffset)@radiusOffset
-			to: radiusOffset@(self height-radiusOffset));
-		draw
-		
-	"aCanvas stroke
-		paint: Color paleBlue;
-		path: ((BlLine new
-			 from: radiusOffset@radiusOffset;
-			 to: (self width-radiusOffset)@(self height-radiusOffset))
-				buildPathOnSpartaCanvas: aCanvas within: self boundsInLocal);
-		draw.
-	aCanvas stroke
-		paint: Color paleBlue;
-		path: ((BlLine new
-			 from: (self width-radiusOffset)@radiusOffset;
-			 to: radiusOffset@(self height-radiusOffset))
-				buildPathOnSpartaCanvas: aCanvas within: self boundsInLocal);
-		draw.”
-]]]
 
 
 [[[
@@ -258,72 +235,11 @@ MgRawCardElement >> drawFlippedSideOnSpartaCanvas: aCanvas
 
 
 
-!!! Resetting the Universe
-Since Bloc is still under development, it may happen that the Universe has to be reinitialized. 
-
-[[[
-BlUniverse reset
-]]]
 
 
-!!!  MgSimpleCardElement
-[[[
-MgCardElement subclass: #MgSimpleCardElement
-	instanceVariableNames: 'face back'
-	classVariableNames: ‘'
-	package: 'Bloc-MemoryGame-Elements'
 
 
-MgSimpleCardElement >> initialize
-	super initialize.
-	
-	self geometry: (BlRectangle cornerRadius: self cornerRadius).
-	self background: self backgroundColor.
-	self layout: BlFrameLayout new.
-	
-	face := BlTextElement new.
-	face constraintsDo: [ :c |
-		c frame horizontal alignCenter.
-		c frame vertical alignCenter ].
-	face visibility: BlVisibility hidden.
-	
-	back := BlElement new
-		constraintsDo: [ :c |
-			c horizontal matchParent.
-			c vertical matchParent ];
-		addChild: (BlLineElement new
-			border: (BlBorder paint: Color paleBlue width: 1);
-			fromAnchor: (BlGeometryStaticAnchor position: 0 @ 0);
-			toAnchor: (BlGeometryStaticAnchor position: 80 @ 80);
-			yourself);
-		addChild: (BlLineElement new
-			border: (BlBorder paint: Color paleBlue width: 1);
-			fromAnchor: (BlGeometryStaticAnchor position: 80 @ 0);
-			toAnchor: (BlGeometryStaticAnchor position: 0 @ 80);
-			yourself).
-		
-	self addChild: face.
-	self addChild: back
-]]]
-
-[[[
-MgSimpleCardElement >> onFlippedFace
-	super onFlippedFace.
-	
-	face visibility: BlVisibility visible.
-	back visibility: BlVisibility hidden.
-]]]
-
-[[[
-MgSimpleCardElement >> onFlippedBack
-	super onFlippedBack.
-	
-	face visibility: BlVisibility hidden.
-	back visibility: BlVisibility visible.
-]]]
-
-
-!!! Adding a board
+!! Adding a board
 
 [[[
 BlElement subclass: #MgGameElement
