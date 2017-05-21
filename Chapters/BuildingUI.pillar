@@ -1,5 +1,6 @@
 !! Building card graphic elements
 
+In this chapter we will build step by step the visual appearance of the cards. 
 
 !!! Card graphical element
 
@@ -13,6 +14,8 @@ BlElement subclass: #MgdCardElement
 	package: 'Bloc-MemoryGame-Demo-Elements'
 ]]]
 
+The message ==backgroundColor== is one of the customisation hooks defined in ==BlElement==. 
+Let us define a nice color. 
 
 [[[
 MgdCardElement >> backgroundColor
@@ -29,7 +32,7 @@ MgdCardElement >> card
 
 [[[
 MgdCardElement >> 	card: aMgCard
-		card := aMgCard.
+		card := aMgCard
 ]]]
 
 We initialize it to get a
@@ -65,7 +68,7 @@ MgdRawCardElement new asSpartaForm
 
 You can also use the the inspector as shown in Figure *@figInspecting0*. Here we create and inspect the graphic element and then we ask it form and look at it in the Morph pane (this is what the Preview pane is actually doing).
 
-+A first extremely basic representation of face down card.>file://figures/Inspecting0.png|width=60|label=figInspecting0+
++A first extremely basic representation of face down card.>file://figures/Inspecting0.png|width=100|label=figInspecting0+
 
 
 !!! Improving the card visual 
@@ -151,6 +154,9 @@ Now we are ready to implement the backside and flipped side
 
 !!! Adding a cross
 
+Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should provide a like as a path. In Bloc this can be done either that passing a Path object or asking the canvas for its shape factory. 
+The shape factory encapsulate the logic of shapes. This is what we do below with the expression ==path: (aCanvas shape line: 0 @ 0 to: self extent)==. The message ==shape== returns a ShapeFactory and that ask this factory to produce a path to produce a line. 
+
 [[[
 MgdCardElement >> drawBacksideOn: aCanvas
 	aCanvas stroke
@@ -159,14 +165,20 @@ MgdCardElement >> drawBacksideOn: aCanvas
 		draw
 ]]]
 
-[[[
-MgdCardElement >> 
-]]]
+
+Once this method defined, refresh the inspector and you should get a card as in Figure *@figOneLIne*.
 
 +A rounded card with half of the cross.>file://figures/CardOneLine.png|width=60|label=figOneLIne+
 
 
-!!! Line within corners
+
+
+
+
+!!! Lines and corners reconciled
+
+In Figure *@figOneLIne* we see that the line is not clipped to the corners. We should address this. 
+This is the way we did it for now. 
 
 [[[
 MgdCardElement >> drawBacksideOn: aCanvas
@@ -175,13 +187,44 @@ MgdCardElement >> drawBacksideOn: aCanvas
 	aCanvas stroke
 		paint: Color gray;
 		width: 3;
-		path: (aCanvas shape line: radiusOffset @ radiusOffset to: self extent - radiusOffset);
+		path: (aCanvas shape 
+				line: radiusOffset @ radiusOffset 
+				to: self extent - radiusOffset);
 		draw
 ]]]
 
+Once you change the method ==drawBacksideOn:== and refresh you should get a card as displayed in Figure *@figClipped*.
++Clipping line.>file://figures/CardClipped.png|width=60|label=figClipped+
+
+!!! Full cross clipped
+
+Now we can add the line to build a full cross. Our solution is defined as follows: 
+
+[[[
+MgdCardElement >> drawBacksideOn: aCanvas
+	| radiusOffset |
+	radiusOffset := 12 / Float pi.
+	aCanvas stroke
+		paint: Color gray;
+		width: 3;
+		path: (aCanvas shape 
+				line: radiusOffset @ radiusOffset 
+				to: self extent - radiusOffset);
+		draw.
+	aCanvas stroke
+		paint: Color gray;
+		width: 3; 
+		path: (aCanvas shape
+				line: (self width - radiusOffset) @ radiusOffset 
+				to: radiusOffset @ (self height - radiusOffset));
+		draw 
+]]]
 
 
++A card with a complete backside.>file://figures/CardFullyClipped.png|width=60|label=figFullClipped+
 
+Now our backside is fully implemented and when you refresh your view, you should get the card 
+as shown in Figure *@figFullClipped*. 
 
 
 !!! Flipped side 
