@@ -335,9 +335,12 @@ MgdCardElement >> drawFlippedOnCanvas: aCanvas
 		draw
 ]]]
 
-With this definition we get a centered letter as shown in Figure *@*
+With this definition we get a centered letter as shown in Figure *@figCardNotCentered*.
 
 +Not centered letter.>file://figures/CardNotCentered.png|width=60|label=figCardNotCentered+
+
+
+Now we are ready to work on the board game.
 
 !! Adding a board
 
