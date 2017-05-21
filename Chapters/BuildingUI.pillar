@@ -228,59 +228,116 @@ as shown in Figure *@figFullClipped*.
 
 
 !!! Flipped side 
+Now we are ready to develop the flipped side of the card. To see if we should change the card model. 
+You can use the inspector to get the cardElement and send it the message ==card flip== or directly 
+recreate a new card  as follows: 
 
 [[[
-MgRawCardElement >> drawFlippedSideOnSpartaCanvas: aCanvas
-	| font textPainter metrics baseline origin |
-	
+| cardEl | 
+cardEl := MgdCardElement2 new.
+cardEl card flip.
+cardEl asSpartaForm
+]]]
+
+You should get an inspector in the situation shown in Figure *@figCardForFlip*.
+Now we are ready to implement the flipped side. 
+
++A card with a complete backside.>file://figures/CardForFlip.png|width=60|label=figCardForFlip+
+
+Let us redefine ==drawFlippedOnCanvas:== as follows: 
+- First we ask the canvas to build font of 50. 
+- Then we ask the canvas to draw a text using the font with the color we want. 
+We should not forget to send the message ==draw== to the canvas. 
+
+[[[
+MgdCardElement >> drawFlippedOnCanvas: aCanvas
+	| font |
+	font := aCanvas font
+		size: 50;
+		build.
+	aCanvas text
+		font: font;
+		paint: Color gray;
+		string: self card symbol asString;
+		draw
+]]]
+
+When we refresh the display we do not see the symbol and this is a problem. 
+If you pay attention you will see that there is just one line that is drawn on the top left of the card. 
+You can change the color to red to see it on the card. 
+We are drawing the string in the corner and outside the rounded rectangle. 
+Let us fix that issue by defining the baseline from which the text should be displayed.
+
+[[[
+MgdCardElement >> drawFlippedOnCanvas: aCanvas
+	| font origin |
+	font := aCanvas font
+		size: 50;
+		build.
+	origin := self extent / 2.
+	aCanvas text
+		baseline: origin;
+		font: font;
+		paint: Color gray;
+		string: self card symbol asString;
+		draw
+]]]
+
+When you refresh the inspector you should see the card symbol but not centered as shown in Figure *@figCardNotCentered*.
+
+
++Not centered letter.>file://figures/CardNotCentered.png|width=60|label=figCardNotCentered+
+
+To center well the text, we have to use exact font metrics. Bloc can support multiple graphical back-end such as Cairo, Moz2D and in the future plain openGL. There is one important constraints is that font metrics should be measured and manipulated via the same back-end abstraction. 
+For this purpose, the expression ==aCanvas text== returns a text painter and such a text painter provide access to the font measures.  Using such measure we can then get access to the text metrics and compute a better center.
+
+[[[
+MgdCardElement >> drawFlippedOnCanvas: aCanvas
+	| font origin textPainter metrics |
 	font := aCanvas font
 		size: 50;
 		build.
 
 	textPainter := aCanvas text
 		font: font;
-		paint: Color white;
+		paint: Color gray;
 		string: self card symbol asString.
 	
-	metrics := textPainter measure.
+	metrics := textPainter measure. 
 	
-	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
-	baseline := origin - metrics textMetrics bounds origin.
-	
-	textPainter
-		baseline: baseline;
+	origin := (self extent - metrics textMetrics bounds extent) / 2.
+	textPainter 
+		baseline: origin;
+		draw
 ]]]
 
-
-
+With this definition we get the letter centered vertically but not horizontally. This is because 
+we have to tak into accoun the font size.
 
 [[[
-MgRawCardElement >> drawFlippedSideOnSpartaCanvas: aCanvas
-	| font textPainter metrics baseline origin |
-	
+MgdCardElement >> drawFlippedOnCanvas: aCanvas
+	| font origin textPainter metrics |
 	font := aCanvas font
 		size: 50;
 		build.
 
 	textPainter := aCanvas text
 		font: font;
-		paint: Color white;
+		paint: Color gray;
 		string: self card symbol asString.
 	
-	metrics := textPainter measure.
+	metrics := textPainter measure. 
 	
-	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
-	baseline := origin - metrics textMetrics bounds origin.
-	
-	textPainter
-		baseline: baseline;
+	origin := (self extent - metrics textMetrics bounds extent) / 2.
+	origin := origin - metrics textMetrics bounds origin.
+	textPainter 
+		baseline: origin;
+		draw
 ]]]
 
+With this definition we get a centered letter as shown in Figure *@*
 
-
-
-
-
++Not centered letter.>file://figures/CardNotCentered.png|width=60|label=figCardNotCentered+
 
 !! Adding a board
 
