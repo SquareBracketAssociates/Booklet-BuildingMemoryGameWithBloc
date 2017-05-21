@@ -11,7 +11,7 @@ A graphic element is a subclass of the ==BlElement==. It simply has a reference 
 BlElement subclass: #MgdCardElement
 	instanceVariableNames: 'card'
 	classVariableNames: ''
-	package: 'Bloc-MemoryGame-Demo-Elements'
+	package: 'Bloc-MemoryGame-Tutorial'
 ]]]
 
 The message ==backgroundColor== is one of the customisation hooks defined in ==BlElement==. 
@@ -325,9 +325,9 @@ MgdCardElement >> drawFlippedOnCanvas: aCanvas
 		font: font;
 		paint: Color gray;
 		string: self card symbol asString.
-	
+
 	metrics := textPainter measure. 
-	
+
 	origin := (self extent - metrics textMetrics bounds extent) / 2.
 	origin := origin - metrics textMetrics bounds origin.
 	textPainter 
@@ -342,31 +342,93 @@ With this definition we get a centered letter as shown in Figure *@figCardNotCen
 
 Now we are ready to work on the board game.
 
-!! Adding a board
+!! Adding a board view
+In the previous chapter, we defined all the card visual. We are now ready to define the game board visual.
+Basically we will define a new element subclass and set its layout 
 
 [[[
-BlElement subclass: #MgGameElement
-	instanceVariableNames: ''
-	classVariableNames: ''
-	package: ‘Bloc-MemoryGame-Elements'
+game := MgdGameModel numbers.
+grid := MgdGameElement2 new.
+grid memoryGame: game. 
 ]]]
 
+!!! The GameElement class
+Here is a typical scenario to create the game. 
+
+[[[
+BlElement subclass: #MgdGameElement
+	instanceVariableNames: 'cards memoryGame'
+	classVariableNames: ''
+	package: 'Bloc-MemoryGame-Tutorial'
+]]]
+
+We define the ==memoryGame:== setter method. We will extend it just after to 
+create all the cards. 
+
+[[[
+MgdGameElement >> memoryGame: aMgdGameModel
+	memoryGame := aMgdGameModel
+]]]
+
+[[[
+MgdGameElement >> memoryGame
+	^ memoryGame
+]]]
+
+During the object initialization we set the layout (i.e., how sub elements are placed inside their container).
+Here we define the layout to be a grid layout and we set it as horizontal.
 [[[
 MgGameElement >> initialize
 	super initialize.
+	self layout: BlGridLayout horizontal.
+]]]
+
+!!! Creating cards
+
+When a model is set for a board game, we use the model information to perform the following actions: 
+- we set the number of column of the layout
+- we create all the card elements paying attention to set their respective model. 
+
+[[[
+MgdGameElement >> memoryGame: aGameModel
+	memoryGame := aGameModel.
 	
-	self background: (BlBackground fill: Color gray darker).
-	
-	self layout: (BlGridLayout horizontal cellSpacing: 20).
-	self constraintsDo: [ :layoutConstraints |
-		layoutConstraints horizontal fitContent.
-		layoutConstraints vertical fitContent ]
+	memoryGame availableCards
+		do: [ :aCard | self addChild: (self newCarElement card: aCard) ]
 ]]]
 
 [[[	
-MgGameElement >> newCardElement
+MgdGameElement >> newCardElement
 	^ MgSimpleCardElement new
 ]]]
+
+
+
+
++A first board.>file://figures/BoardStarted.png|width=60|label=figBoardStarted+
+
+
+
+[[[
+MgdGameElement >> memoryGame: aGameModel
+	memoryGame := aGameModel.
+	self layout columnCount: memoryGame gridSize.
+	
+	memoryGame availableCards
+		do: [ :aCard | self addChild: (self newCarElement card: aCard) ]
+]]]
+
+
+
+
+
+
+
+
+
+!! Interaction
+
+
 
 [[[
 MgGameElement >> memoryGame: aMemoryGame
