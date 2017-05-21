@@ -112,22 +112,28 @@ MgdCardModel >> flipped: aBoolean
 ]]]
 
 The notification is implementing as follows in the ==notifyFlipped== method. 
+It simply announces the ==MgdCardFlippedAnnouncement==. The view elements will have to register to listen to such announcements. 
 
 [[[
 MgdCardModel >> notifyFlipped
 	"Notify all observers that my flipped state was changed (from flipped to not or the other way around)"
 
-	self announcer announce: MgCardFlippedAnnouncement new
+	self announcer announce: MgdCardFlippedAnnouncement new
 ]]]
 
-The final aspect worth mentioning is the method ==disappear==.
+The final aspect worth mentioning is the method ==disappear== which works the same way.
 
 [[[
 MgdCardModel >> disappear
-
 	self notifyDisappear
 ]]]
 
+
+[[[
+MgdCardModel >> notifyDisappear
+	"Notify all observers that I disappeared from the game"
+	self announcer announce: MgCardDisappearAnnouncement new
+]]]
 
 !!! Reviewing the game model
 
