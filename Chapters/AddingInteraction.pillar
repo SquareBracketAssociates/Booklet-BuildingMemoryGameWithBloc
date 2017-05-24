@@ -86,16 +86,37 @@ MgdCardEventListener >> clickEvent: anEvent
 	memoryGame chooseCard: anEvent currentTarget card
 ]]]
 
-It means that the memory game model is changed but we do not see the visual effect of our actions.
-Indeed this is normal. We never made sure that visual elements are listening to model changes. 
-This is what we will do in the following chapter. 
+It means that the memory game model is changed but we do not see the visual effect of our actions. Indeed this is normal. We never made sure that visual elements are listening to model changes.  This is what we will do in the following chapter. 
 
 
 
-!! Connecting the model to the UI
+!!! Connecting the model to the UI
+Now we show how the domain communicates with the user interface: the domain emit notifications
+using announcements but its does not refer to the UI elements. It is the visual elements that should register to the notifications and react accordingly.
 
-In this chapter, we will show how the domain is communicating with the user interface: the domain emit notifications
-using announcements but does not refer to the UI. It is the visual elements that should register to the notifications and react accordingly.
+
+Let us first define two simple methods in the class ==CardElement== just producing a trace.
+[[[
+MgdCardElement >> onDisappear
+	Transcript show: 'On disappear'; cr
+]]]
+
+[[[
+MgdCardElement >> onFlipped
+	Transcript show: 'On flipped'; cr
+]]]
+
+Now we can modify the setter so that when a card model is set to a card graphical element, we register to the notifications emitted by the model. 
+In the following method, we make sure that on notifications we invoke the trace methods just defined. 
+
+[[[
+MgdCardElement >> card: aMgdCard
+	card := aMgdCard.
+	card announcer when: MgCardFlippedAnnouncement send: #onFlipped to: self.
+	card announcer when: MgCardDisappearAnnouncement send: #onDisappear to: self
+]]]
+
++Tracing registration to the domain notifications.>file://figures/EventTraced.png|width=100|label=figBoardEventTraced+
 
 
 
