@@ -9,3 +9,5 @@ Right now still in draft mode.
 
 [Browse] the directory for released versions of the booklet or
 look here for more [Books and Booklets](http://books.pharo.org/)
+
+You can find the pdf at https://ci.inria.fr/pharo-contribution/view/Books/job/Booklet-BlocMemoryGame/
