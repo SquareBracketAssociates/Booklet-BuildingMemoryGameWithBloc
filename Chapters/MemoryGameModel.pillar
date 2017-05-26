@@ -1,27 +1,31 @@
 !! Objectives of this book
 
-Bloc's deign is getting stable and this book is a first tutorial on Bloc.
+Bloc's design is getting stable and this book is a first tutorial on Bloc.
 Some elements may change such as the name of certain methods, but most of these changes
 will be minor.
 
-In this tutorial you will be will a memory game. We provide the model and focus on the UI part. 
+In this tutorial you will build a memory game. We provide the model and focus on creating the UI of the game. 
 
 
 !!! Memory game
 
-Let us have a look at what we want to build with you: a simple Memory game. A memory game is a game where the players should remember revealed cards and find pairs of them.
-For now we will focus on the game core logic and ui: the board and the card. 
+Let us have a look at what we want to build with you: a simple Memory game. 
+In a memory game players need to find pairs of similar cards. In each round 
+a player turns over two cards at a time. If the two cards show the same symbol 
+they are removed and the player gets a point. If not, they are both flipped. 
 
-Figure *@figmemoryExample0* shows the game after the first selection of two cards. Card face down are represented with a cross and revealed cards are just showing a number.
+For example, Figure *@figmemoryExample0* shows the game after the first selection 
+of two cards. Face-down cards are represented with a cross and turned cards are 
+just showing a number. Figure *@figmemoryExample1* show the same game after a few 
+rounds. While this game can be played by multiple playes, in this turorial we will 
+build a game with just one player. 
 
-+The game at the beginning: faced down card are represented with a cross and visible card with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
++The game after the player selected two cards: faced-down cards are represented with a cross and turned card with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
 
-
-Here is the code that we will execute to build and launch the game core.
+To start with, here is the code that builds and launches the game:
 
 [[[
-	
-game := MgdGameModel numbers.
+game := MgdGameModel new initializeForSymbols: '12345678'.
 grid := MgdGameElement new.
 grid memoryGame: game.	
 
@@ -31,24 +35,24 @@ space root addChild: grid.
 space show 
 ]]]
 
-- We create a grame model and ask to get numbers associated with the cards.
-- Then we create a graphical game element
-- We assign the model of the game to the UI. 
-- Finally we create a graphical space in which we place the game ui and we launch it. 
+- first, we create a grame model and ask to get the numbers from 1 to 8 associated with the cards. By default a game model has a size of 4 by 4, which requires eight different cards.
+- Second, we create a graphical game element.
+- Third, we assign the model of the game to the UI. 
+- Finally, we create a graphical space in which we place the game UI and we display the space. 
  
  
-+Another state of the memory game after the identification of two pairs.>file://figures/memoryExample1.png|width=60|label=figmemoryExample1+
++Another state of the memory game after the player correctly matched two pairs.>file://figures/memoryExample1.png|width=60|label=figmemoryExample1+
 
-!!! Getting in started
+!!! Getting started
 
-This tutorial is for Pharo 60 with the latest Pharo60 Virtual machine.
+This tutorial is for Pharo 60 running on the latest Pharo60 Virtual machine.
 You can get them at the following address
 
 [[[
 http://get.pharo.org/60+vm
 ]]]
 
-Execute this on unix system:
+Alternatively, you can download them by executing the line below on a Linux or MacOs system:
 
 [[[
 wget -O- get.pharo.org/60+vm | bash
