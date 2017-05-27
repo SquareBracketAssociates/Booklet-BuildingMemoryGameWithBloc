@@ -118,6 +118,40 @@ MgdCardElement >> card: aMgdCard
 
 +Tracing registration to the domain notifications.>file://figures/EventTraced.png|width=100|label=figBoardEventTraced+
 
+Now when you click on a card, you can see the trace in the Transcript but you do not see the changes. This is because we should notify 
+the graphics engine that one element should be redrawn. 
+
+
+[[[
+MgdCardElement >> onFlipped
+	Transcript show: 'On flipped'; cr.
+	self invalidate
+]]]
+
+
+The following one does not work. 
+[[[
+MgdCardElement >> onDisappear
+	Transcript show: 'On disappear'; cr.
+	self invalidate
+]]]
+
+
+!!! Refreshing on missed pair
+
+When the player selects two cards that are not in pair, we present the two cards as shown in Figure *@figBoardMissedPair*.
+Now the clicking on another card will flip back the previous cards. 
+
+Remember a card when flipped in either sense will raise a notification. 
+
+[[[
+MgdCardElement >> flipped: aBoolean
+	flipped := aBoolean.
+	self notifyFlipped
+]]]
+
++Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=100|label=figBoardMissedPair+
+
 
 
 !! Adding animation
