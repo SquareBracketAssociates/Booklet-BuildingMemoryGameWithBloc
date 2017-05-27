@@ -110,10 +110,10 @@ Now we can modify the setter so that when a card model is set to a card graphica
 In the following method, we make sure that on notifications we invoke the trace methods just defined. 
 
 [[[
-MgdCardElement >> card: aMgdCard
-	card := aMgdCard.
-	card announcer when: MgCardFlippedAnnouncement send: #onFlipped to: self.
-	card announcer when: MgCardDisappearAnnouncement send: #onDisappear to: self
+MgdCardElement >> card: aMgCard
+	card := aMgCard.
+	card announcer when: MgdCardFlippedAnnouncement send: #onFlipped to: self.
+	card announcer when: MgdCardDisappearAnnouncement send: #onDisappear to: self
 ]]]
 
 +Tracing registration to the domain notifications.>file://figures/EventTraced.png|width=100|label=figBoardEventTraced+
@@ -128,13 +128,30 @@ MgdCardElement >> onFlipped
 	self invalidate
 ]]]
 
+!!! Handling disappear
 
-The following one does not work. 
+There are two ways to implement the disappear of a card either setting the opacity of the element 
+to 0. 
+
 [[[
 MgdCardElement >> onDisappear
 	Transcript show: 'On disappear'; cr.
+	self opacity: 0.
 	self invalidate
 ]]]
+
+Note that the element is still present and receive events. 
+
+Or changing the visibility as follows:
+
+[[[
+MgdCardElement >> onDisappear
+	Transcript show: 'On disappear'; cr.
+	self visibility: BlVisibility hidden.
+	self invalidate. "not needed in the latest Bloc"
+]]]
+	
+Note that in such case, the element does not get events. It is used for layout. 
 
 
 !!! Refreshing on missed pair
@@ -150,6 +167,16 @@ MgdCardElement >> flipped: aBoolean
 	self notifyFlipped
 ]]]
 
+In the method ==choseCard:== we see that all hte previous cards are flip (toggled).
+
+[[[
+(self chosenCards size > self matchesCount)
+	ifTrue: [ 
+		self chosenCards allButLastDo: [ :each | each flip ].
+		self chosenCards removeAll.
+		self chosenCards add: aMgCard ]
+]]]
+		
 +Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=100|label=figBoardMissedPair+
 
 
