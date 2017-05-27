@@ -247,7 +247,7 @@ Now we are ready to implement the flipped side.
 +A card with a complete backside.>file://figures/CardForFlip.png|width=60|label=figCardForFlip+
 
 Let us redefine ==drawFlippedOnCanvas:== as follows: 
-- First we ask the canvas to build font of 50. 
+- First we ask the canvas to build font of 50. Note that for the font we specify a FreeType font (pay attention that strike font do not work and will never work in Bloc - in fact they will be removed once Pharo will be based on Bloc).
 - Then we ask the canvas to draw a text using the font with the color we want. 
 We should not forget to send the message ==draw== to the canvas. 
 
@@ -255,6 +255,7 @@ We should not forget to send the message ==draw== to the canvas.
 MgdCardElement >> drawFlippedOnCanvas: aCanvas
 	| font |
 	font := aCanvas font
+		named: 'Source Sans Pro';
 		size: 50;
 		build.
 	aCanvas text
@@ -274,6 +275,7 @@ Let us fix that issue by defining the baseline from which the text should be dis
 MgdCardElement >> drawFlippedOnCanvas: aCanvas
 	| font origin |
 	font := aCanvas font
+		named: 'Source Sans Pro';
 		size: 50;
 		build.
 	origin := self extent / 2.
@@ -297,6 +299,7 @@ For this purpose, the expression ==aCanvas text== returns a text painter and suc
 MgdCardElement >> drawFlippedOnCanvas: aCanvas
 	| font origin textPainter metrics |
 	font := aCanvas font
+		named: 'Source Sans Pro';
 		size: 50;
 		build.
 
@@ -320,6 +323,7 @@ we have to tak into accoun the font size.
 MgdCardElement >> drawFlippedOnCanvas: aCanvas
 	| font origin textPainter metrics |
 	font := aCanvas font
+		named: 'Source Sans Pro';
 		size: 50;
 		build.
 
