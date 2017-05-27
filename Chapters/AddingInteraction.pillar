@@ -170,11 +170,13 @@ MgdCardElement >> flipped: aBoolean
 In the method ==choseCard:== we see that all hte previous cards are flip (toggled).
 
 [[[
+...
 (self chosenCards size > self matchesCount)
 	ifTrue: [ 
 		self chosenCards allButLastDo: [ :each | each flip ].
 		self chosenCards removeAll.
 		self chosenCards add: aMgCard ]
+...
 ]]]
 		
 +Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=100|label=figBoardMissedPair+
