@@ -179,7 +179,7 @@ In the method ==choseCard:== we see that all hte previous cards are flip (toggle
 ...
 ]]]
 		
-+Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=100|label=figBoardMissedPair+
++Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=60|label=figBoardMissedPair+
 
 
 !!! Main interaction done	
