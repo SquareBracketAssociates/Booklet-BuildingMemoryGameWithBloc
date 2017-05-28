@@ -89,12 +89,12 @@ all communication is done via announcements. On the other hand, the graphic elem
 communicating directly with the model.
 
 In the remainder of this chapter we describe the game model in details. If you want to move directly to
-building graphical elements using Block the package ==Bloc-MemoryGame-Demo== already contains the model.
+building graphical elements using Bloc, the package ==Bloc-MemoryGame-Demo== already contains the model.
 
 
 !!! Reviewing the card model
 
-Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not and an announcer to emit state changes. This object could also be a subclass of Model which already provide announcer management. 
+Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not, and an announcer to emit state changes. This object could also be a subclass of Model which already provide announcer management. 
 
 [[[
 Object subclass: #MgdCardModel
@@ -128,8 +128,9 @@ MgdCardModel >>	announcer
 	^ announcer ifNil: [ announcer := Announcer new ]
 ]]]
 
+!!! Card simple operations
 
-Next we need two API methods to flip a card and make it dissaper when it is no longer needed in the game.
+Next we need two API methods to flip a card and make it disappear when it is no longer needed in the game.
 
 [[[
 MgdCardModel >> flip
@@ -142,9 +143,10 @@ MgdCardModel >> disappear
 	self notifyDisappear
 ]]]
 
-The notification is implementing as follows in the ==notifyFlipped== and ==notifyDisappear== methods. 
+!!! Adding notification
+The notification is implemented as follows in the ==notifyFlipped== and ==notifyDisappear== methods. 
 They simply announce events of type ==MgdCardFlippedAnnouncement== and ==MgdCardDisappearAnnouncement==. 
-The graphical elements will have to register subscriptions for these announcements. 
+The graphical elements will have to register subscriptions for these announcements as we will see later.
 
 [[[
 MgdCardModel >> notifyFlipped
@@ -176,7 +178,7 @@ Announcement subclass: #MgdCardDisappearAnnouncement
 We add one final method to print a card in a nicer way and we are done with the card model!
 
 [[[
-MgdCardModel >>	printOn: aStream
+MgdCardModel >> printOn: aStream
 	aStream
 		nextPutAll: 'Card';
 		nextPut: Character space;
@@ -187,7 +189,7 @@ MgdCardModel >>	printOn: aStream
 
 !!! Reviewing the game model
 
-The game model is simple: it keeps the tracks off all the available cards and all the cards currently selected by the player. 
+The game model is simple: it keeps the tracks of all the available cards and all the cards currently selected by the player. 
 
 [[[
 Object subclass: #MgdGameModel
@@ -195,6 +197,8 @@ Object subclass: #MgdGameModel
 	classVariableNames: ''
 	package: 'Bloc-MemoryGame-Demo-Model'
 ]]]
+
+The ==initialize== method set two collections for the different cards.
 [[[
 MgdGameModel >> initialize
 	super initialize.
@@ -210,7 +214,8 @@ MgdGameModel >> chosenCards
 	^ chosenCards
 ]]]
 
-We hardcode for now the size of the grid and of the number of cards that need to be matched by a player. 
+!!! Grid size and card number
+We hardcode for now the size of the grid and of the number of cards that need to be matched by a player.
 [[[
 MgdGameModel >> gridSize
 	"Return grid size, total amount of card is gridSize^2"
@@ -227,6 +232,8 @@ MgdGameModel >> cardsCount
 	^ self gridSize * self gridSize
 ]]]
 
+
+!!! Initialization
 To initialize the game with cards we add a dedicated method, ==initializeForSymbols:==. 
 This method creates a list of cards from a list of characters and shuffle it. 
 We also add an assertion in this method to verify that the called provided enough characters.
@@ -239,14 +246,15 @@ MgdGameModel >> initializeForSymbols: characters
 		description: [ 'Amount of characters must be equal to possible all combinations' ].
 	availableCards := (characters asArray collect: [ :aSymbol | 
 		(1 to: self matchesCount) collect: [ :i |
-			 MgCardModel new symbol: aSymbol ] ]) 
+			 MgdCardModel new symbol: aSymbol ] ]) 
 			    flattened shuffled asOrderedCollection
 ]]]
 
-Next we need ==chooseCard==, a method that will be called when a user selectes a card. 
+!!! Game logic
+Next we need ==chooseCard:==, a method that will be called when a user selects a card. 
 This method is actually the most complex method of the model and implements the main
 logic of the game. First, the method makes sure that the seleted card is not already selected.
-This could happen if the views uses animations that give players the change to click on the card more then once.
+This could happen if the view uses animations that give players the chance to click on the card more then once.
 Next, the card is flipped by sending it the message ==flip==. 
 Finally, depending on the actual state of the game the step is complete and the selected cards removed, 
 or all selected cards are flipped back.
@@ -263,16 +271,16 @@ MgdGameModel >> chooseCard: aCard
 		self resetStep ]
 ]]]
 
-The current step is completed if the player selected the right ammont of cards and they all show the same symbol.
-In this case, all selected cards receive the message ==dissapear== and are removed from the list of selected cards.
+The current step is completed if the player selected the right amount of cards and they all show the same symbol.
+In this case, all selected cards receive the message ==disappear== and are removed from the list of selected cards.
 
 [[[
 MgdGameModel >> shouldCompleteStep
-	^ self chosenCards size = self matchesCount and: [ 
-		self chosenCardMatch ]
+	^ self chosenCards size = self matchesCount 
+		and: [ self chosenCardMatch ]
 ]]]
 [[[
-MgdGameModel >>	chosenCardMatch
+MgdGameModel >> chosenCardMatch
 	| firstCard |
 	firstCard := self chosenCards first.
 	^ self chosenCards allSatisfy: [ :aCard | 
@@ -287,11 +295,11 @@ MgdGameModel >>	completeStep
 
 
 The current step should be reset if the player selected a third card. This will happen when a player already
-selected two cards that did not match and clicked on a third one. In this sitution the initial two cards will be
+selected two cards that did not match and clicked on a third one. In this situation the two initialcards will be
 flipped back. The list of selecte cards will only contain the third card.
 
 [[[
-MgdGameModel >>	shouldResetStep 
+MgdGameModel >> shouldResetStep 
 	^ self chosenCards size > self matchesCount
 ]]]
 [[[
