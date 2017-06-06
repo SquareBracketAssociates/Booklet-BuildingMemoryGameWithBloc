@@ -1,9 +1,14 @@
 sudo: required
 services:
-  - docker
-
+- docker
 before_install:
-  - docker pull dpollet/texlive:pillar
-
+- docker pull dpollet/texlive:pillar
 script:
-  - docker run --tty --rm --volume $PWD:/work dpollet/texlive:pillar make spiralbook
+- docker run --tty --rm --volume $PWD:/work dpollet/texlive:pillar make spiralbook
+deploy:
+  provider: releases
+  api_key:
+    secure: ViWOdPuK/OwMHF+n7pwF8WX89NHVU9sLsPTrzWv9SX/ikVZbLrP2vfnBABwTzivo/Dzo8LPx/1zwiN+R71WY2gNDlgLyUykFosX8XS9kuhEmoFsKCYRLI7JXSi5/13cG2rcPlnwdjst68hXa4Dltb+GWBErjx2ol2d8TRQXnRp6+QPN+fxSBNXsKDd5OrnTWQvSgCa8YJHczgc0xpgM+c56Wu8mYuIt2jmyUTen3qKX84vNqfq8/JEnS50Po6AOh7Ak8k+WsAzrPs7uoWx+kUsZaTLrL8a+CZxY5uwS4uQkTUKni6+V3hUpUnKla90/KfotHiPZJtwOQhwgMSu5H+NhpcMEDXqKmJas5sZd3NAa7Z5Y5Dk0B7b8ILtfU8amwfXbWzvd4Rc1HcpjS8TEiow8DD6aUzOoBJICBndmwMQuSCHqBHFwc1n4IgvMGHbLfmekKeG2uEXhNaJYMrJHQ0A9rRmlvNieyAAo96DFrqFr5zUeH7Rcey9b3YzM96kFs/Pi4B7u9VVhW9h4h05FoG0mbGze/i6D2R/jcLkMlOlMkhekkIZnkjyBcG4YvcBB9Ghgh5eaQOjWHcND5Dy9HAQ7ArY9tnlPXuUL4rBmGZPQCt8c9ieUVYRLqc9fWvTWc1LANkz2WYuVkSciqfaJGNL/g0nxdwGhh0ucpazubqDg=
+  file: build/book.pdf
+  on:
+    repo: SquareBracketAssociates/Booklet-BuildingMemoryGameWithBloc
