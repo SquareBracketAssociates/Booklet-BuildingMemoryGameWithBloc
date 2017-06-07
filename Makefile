@@ -1,4 +1,4 @@
-MAIN = book
+MAIN = memorygame
 CHAPTERS = \
 	Chapters/AddingInteraction \
 	Chapters/MemoryGameModel \
