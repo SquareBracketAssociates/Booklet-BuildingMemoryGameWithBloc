@@ -1,4 +1,5 @@
 MAIN := $(shell ./pillar introspect mainDocument)
+
 CHAPTERS = \
 	Chapters/AddingInteraction \
 	Chapters/MemoryGameModel \
