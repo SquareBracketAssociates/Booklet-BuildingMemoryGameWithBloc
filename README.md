@@ -10,4 +10,6 @@ Right now still in draft mode.
 [Browse] the directory for released versions of the booklet or
 look here for more [Books and Booklets](http://books.pharo.org/)
 
-You can find the pdf at https://ci.inria.fr/pharo-contribution/view/Books/job/Booklet-BlocMemoryGame/
+The result from the latest successful Travis build can be found [on Bintray (PDF)](https://bintray.com/squarebracketassociates/wip/download_file?file_path=bloc-wip.pdf).
+
+You can find the pdf at [https://ci.inria.fr/pharo-contribution/view/Books/job/Booklet-BlocMemoryGame/] [https://ci.inria.fr/pharo-contribution/view/Books/job/Booklet-BlocMemoryGame/]

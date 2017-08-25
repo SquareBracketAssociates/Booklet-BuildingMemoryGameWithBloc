@@ -1,0 +1,27 @@
+{
+    "package": {
+        "name": "booklet-BuildingMemoryGameWithBloc",
+        "repo": "wip",
+        "subject": "squarebracketassociates",
+        "desc": "Smacc",
+        "licenses": ["MIT"],
+        "website_url": "https://github.com/SquareBracketAssociates/Booklet-BuildingMemoryGameWithBloc",
+        "issue_tracker_url": "https://github.com/SquareBracketAssociates/Booklet-BuildingMemoryGameWithBloc/issues",
+        "vcs_url": "https://github.com/SquareBracketAssociates/Booklet-BuildingMemoryGameWithBloc.git",
+        "labels": ["work-in-progress"]
+    },
+
+    "version": {
+        "name": "latest",
+        "desc": "Latest successful build"
+    },
+
+    "files": [
+        {
+            "includePattern": "build/(book).spiral.pdf",
+            "uploadPattern": "$1bloc-wip.pdf",
+            "matrixParams": { "override": 1 }
+        }
+    ],
+    "publish": true
+}

@@ -1,18 +1,28 @@
 sudo: required
 services:
-- docker
+  - docker
 
-before_install:
-- docker pull dpollet/texlive:pillar
+install: docker pull dpollet/texlive:pillar
 
-script:
-- docker run --tty --rm --volume $PWD:/work dpollet/texlive:pillar make pdfbook spiralbook
+script: |
+  docker run --tty --rm --volume $PWD:/work dpollet/texlive:pillar bash -c "\
+    wget --quiet --output-document=- 'https://raw.githubusercontent.com/pillar-markup/pillar/master/download.sh' | bash \
+    && make spiralbook \
+  "
 
 deploy:
-  provider: releases
-  api_key:
-    secure: ViWOdPuK/OwMHF+n7pwF8WX89NHVU9sLsPTrzWv9SX/ikVZbLrP2vfnBABwTzivo/Dzo8LPx/1zwiN+R71WY2gNDlgLyUykFosX8XS9kuhEmoFsKCYRLI7JXSi5/13cG2rcPlnwdjst68hXa4Dltb+GWBErjx2ol2d8TRQXnRp6+QPN+fxSBNXsKDd5OrnTWQvSgCa8YJHczgc0xpgM+c56Wu8mYuIt2jmyUTen3qKX84vNqfq8/JEnS50Po6AOh7Ak8k+WsAzrPs7uoWx+kUsZaTLrL8a+CZxY5uwS4uQkTUKni6+V3hUpUnKla90/KfotHiPZJtwOQhwgMSu5H+NhpcMEDXqKmJas5sZd3NAa7Z5Y5Dk0B7b8ILtfU8amwfXbWzvd4Rc1HcpjS8TEiow8DD6aUzOoBJICBndmwMQuSCHqBHFwc1n4IgvMGHbLfmekKeG2uEXhNaJYMrJHQ0A9rRmlvNieyAAo96DFrqFr5zUeH7Rcey9b3YzM96kFs/Pi4B7u9VVhW9h4h05FoG0mbGze/i6D2R/jcLkMlOlMkhekkIZnkjyBcG4YvcBB9Ghgh5eaQOjWHcND5Dy9HAQ7ArY9tnlPXuUL4rBmGZPQCt8c9ieUVYRLqc9fWvTWc1LANkz2WYuVkSciqfaJGNL/g0nxdwGhh0ucpazubqDg=
-  file: build/memorygame.pdf
-  draft: true
+- provider: bintray
+  file: .bintray.json
   on:
     repo: SquareBracketAssociates/Booklet-BuildingMemoryGameWithBloc
+  skip_cleanup: true
+  user: ducasse
+  key:
+    secure: Dl19bSLer76VRU5QgI8AFaopGusOyC7NDtjGyaoBR4UmvxxSHh1OERKdcjaWr9IdbpmiUtKqKsit8Kmz4x+tJNFjEQ+jjSAw0syKD5nd7YcD3w8IbD1fFcq68FVGWwmzGl63CzS/4QwgkWnsvYCg40zeP3wE9RcUIifleJwPoIP/CUEo01Q/satdiHLlRJsdMOyVWdD2PUfRQWrd3jQkklNMvB1LRozTZCcj/VqJVlPVt7Xp8LDwsd0NWDSTkCBy0f9sd+C62gpL4gRWNPIcm1lUdwrO09Tv2nAWAm3m8ro3W+/RVZSwMm+j0E3lwGX0WY1yIn00hdJzEwelpHtTeLnJqHlfuBl3S9973FFIFCBMQBjbZyf3Hq61Fa6DIOvWVj0WmKHZ/TYdcXCaCTXrdxBykEYzPrTsiQsmIKBCwHh/REMoBUARjlgoVPkJSySVX5/ncXpOx2aNWyGg3Ec2WSIypT4TBgXtFFqNB4k+n7IfN8PPWx6u7GViXkKSD4ouTOcOtaWD6KqARIBHaUNxqVF/uzESDlQpDkMjCwYNMeVCJf3t0F0RF3VlUMytsE8HLk/kdSmRu22+jqMV+9re4FqjimOJiCk8cc4ym4ABsRRyb7YzNyhwxYWHK16Tml/lkCeUQUUFrly6z3tomRUrPh9Euoo59r5Sy7gbhayuBN0=
+- provider: releases
+  file: build/book.spiral.pdf
+  on:
+    tags: true
+  skip_cleanup: true
+  api_key:
+    secure: pRfu3fr35BzqQDi1ul0SubPSwO8zcyIidqLRZPz3XIrH4qoy1Zgnq785dmB7ziNQqH+VJyh7askSFY3JLxL0d4P0eUgj2ZDIOhJsUQQ/ihevOBWbxlMOoEPjQfzA11l8WrNCQ566KrcYiISRi7bCg698kPTWSRwOmmvqXOJe5zGkuUbVmMNUV2oxaNV4JC8kVyVWHYy0nNMLEX/hzRZRh1+8K34/ds+fZ7irLrbDWMbKGHCyuLCSqv+zJJdu99nWLTclrCxFzK4DEHaMlFiO7wkUpyQLwZ38EDnb3E7iv045jSqCx3XB+DMRG1Da2/9BIXl0mho5ELdEvfGVAbjI2no5FWd0H1cs4/banAePCFnM7ZscJBaPWgVajB7EzrcADJUoxpmU6+6n1aIC3CnjscfAHqSAKGv8CO/Jh+Uirc8ATRpSqa73f2Nnj9tRCqwCOnFOCEzu0w5l3Ppz2Qpif04P+QbebZehSVaBJ4W01R2i8Rac3IuZDhZVaek1X24HFxUOd/rvHpbhz8eeANdnsWCTkAm+0sD+iKsWKICRMxFZfCK/SPldAcjXZsOsEMTqfx7ZWyCc7GeesQWcmW+z3shziyQd9tdeArJWLwacly3hH3WeyuUD5JyPF9klvDBtHgTVajdU4yp+3oXsrtTmetnBz+RESxQGdLgZRlQBQog=
