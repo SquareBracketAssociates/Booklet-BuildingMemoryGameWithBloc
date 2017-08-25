@@ -18,8 +18,8 @@
 
     "files": [
         {
-            "includePattern": "build/(book).spiral.pdf",
-            "uploadPattern": "$1bloc-wip.pdf",
+            "includePattern": "build/(memorygame).spiral.pdf",
+            "uploadPattern": "$1blocmemorygame-wip.pdf",
             "matrixParams": { "override": 1 }
         }
     ],
