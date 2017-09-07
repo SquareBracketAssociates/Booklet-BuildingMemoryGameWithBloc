@@ -4,7 +4,7 @@
 Now we will add interaction to the game. We want to flip the cards by clicking on them. 
 Bloc supports such situations using two mechanisms: on one hand, event listeners handle events
 and on the other hand, the communication between the model and view is managed via the registration to announcements
-send by the model.
+sent by the model.
 
 
 !!! An event listener
