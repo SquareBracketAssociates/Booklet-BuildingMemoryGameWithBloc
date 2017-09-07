@@ -1,10 +1,10 @@
 
 !! Adding Interaction
 
-Now we will add interation to the game. We want to flip the card by clicking on them. 
-Bloc supports such situation using two mechanisms: on one hand, event listeners handle events
+Now we will add interaction to the game. We want to flip the cards by clicking on them. 
+Bloc supports such situations using two mechanisms: on one hand, event listeners handle events
 and on the other hand, the communication between the model and view is managed via the registration to announcements
-raised by the model.
+sent by the model.
 
 
 !!! An event listener
@@ -17,7 +17,7 @@ BlElementEventListener subclass: #MgdCardEventListener
 ]]]
 
 We add an instance variable ==memoryGame== holding a game model to the listener because 
-we will need to access the model to react to event for example to update the game situation. 
+we will need to access the model to react to events for example to update the game situation. 
 
 [[[
 MgdCardEventListener >> memoryGame: aGameModel
@@ -91,8 +91,8 @@ It means that the memory game model is changed but we do not see the visual effe
 
 
 !!! Connecting the model to the UI
-Now we show how the domain communicates with the user interface: the domain emit notifications
-using announcements but its does not refer to the UI elements. It is the visual elements that should register to the notifications and react accordingly.
+Now we show how the domain communicates with the user interface: the domain emits notifications
+using announcements but it does not refer to the UI elements. It is the visual elements that should register to the notifications and react accordingly.
 
 
 Let us first define two simple methods in the class ==CardElement== just producing a trace.
@@ -130,7 +130,7 @@ MgdCardElement >> onFlipped
 
 !!! Handling disappear
 
-There are two ways to implement the disappear of a card either setting the opacity of the element 
+There are two ways to implement the disappear of a card, either setting the opacity of the element 
 to 0. 
 
 [[[
@@ -151,12 +151,12 @@ MgdCardElement >> onDisappear
 	self invalidate. "not needed in the latest Bloc"
 ]]]
 	
-Note that in such case, the element does not get events. It is used for layout. 
+Note that in the last case the element does not get events. It is used for layout. 
 
 
 !!! Refreshing on missed pair
 
-When the player selects two cards that are not in pair, we present the two cards as shown in Figure *@figBoardMissedPair*.
+When the player selects two cards that are not a pair, we present the two cards as shown in Figure *@figBoardMissedPair*.
 Now the clicking on another card will flip back the previous cards. 
 
 Remember a card when flipped in either sense will raise a notification. 
@@ -167,7 +167,7 @@ MgdCardElement >> flipped: aBoolean
 	self notifyFlipped
 ]]]
 
-In the method ==choseCard:== we see that all hte previous cards are flip (toggled).
+In the method ==choseCard:== we see that all the previous cards are flip (toggled).
 
 [[[
 ...
@@ -179,12 +179,12 @@ In the method ==choseCard:== we see that all hte previous cards are flip (toggle
 ...
 ]]]
 		
-+Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=60|label=figBoardMissedPair+
++Selecting two cards that are not a pair.>file://figures/BoardMissedPair.png|width=60|label=figBoardMissedPair+
 
 
 !!! Main interaction done	
 
-At the stage you are done for the simple interaction. The following chapter will explain how we can add animation. 
+At this stage you are done for the simple interaction. The following chapter will explain how we can add animation. 
 
 
 !! Adding animation
