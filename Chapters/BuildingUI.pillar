@@ -1,8 +1,8 @@
 !! Building card graphical elements
 
 In this chapter we will build step by step the visual appearance of the cards.
-In Bloc visual objects are called elements and usually you define subclass of ==BlElement== the inheritance tree root.
-In subsequent chapters we will do the same for the game and add interaction in terms of event listeners.
+In Bloc visual objects are called elements and usually you define a subclass of ==BlElement==, the inheritance tree root.
+In subsequent chapters we will do the same for the game and add interaction using event listeners.
 
 !!! First: the card element
 
@@ -68,7 +68,7 @@ Now to see the result in Morphic we have to get a spartaForm as follows:
 MgdRawCardElement new asSpartaForm
 ]]]
 
-You can also use the the inspector as shown in Figure *@figInspecting0*. Here we create and inspect the graphic element and then we ask it form and look at it in the Morph pane (this is what the Preview pane is actually doing).
+You can also use the the inspector as shown in Figure *@figInspecting0*. Here we create and inspect the graphic element and then we ask for its form and look at it in the Morph pane (this is what the Preview pane is actually doing).
 
 +A first extremely basic representation of face down card.>file://figures/Inspecting0.png|width=100|label=figInspecting0+
 
@@ -107,7 +107,7 @@ MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
 		draw
 ]]]
 
-You should get then a visual aspect close to the one shown in Figure *@figrounded1*.
+You should get then a visual representation close to the one shown in Figure *@figrounded1*.
 
 
 +A rounded card.>file://figures/CardRounded1.png|width=60|label=figrounded1+
@@ -156,8 +156,8 @@ Now we are ready to implement the backside and flipped side
 
 !!! Adding a cross
 
-Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should provide a like as a path. In Bloc this can be done either that passing a Path object or asking the canvas for its shape factory. 
-The shape factory encapsulate the logic of shapes. This is what we do below with the expression ==path: (aCanvas shape line: 0 @ 0 to: self extent)==. The message ==shape== returns a ShapeFactory and that ask this factory to produce a path to produce a line. 
+Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should provide it as a path. In Bloc this can be done by either passing a Path object or by asking the canvas for its shape factory. 
+The shape factory encapsulates the logic of shapes. This is what we do below with the expression ==path: (aCanvas shape line: 0 @ 0 to: self extent)==. The message ==shape== returns a ShapeFactory and we ask this factory to produce a path to produce a line. 
 
 [[[
 MgdCardElement >> drawBacksideOn: aCanvas
@@ -168,7 +168,7 @@ MgdCardElement >> drawBacksideOn: aCanvas
 ]]]
 
 
-Once this method defined, refresh the inspector and you should get a card as in Figure *@figOneLIne*.
+Once this method is defined, refresh the inspector and you should get a card as in Figure *@figOneLIne*.
 
 +A rounded card with half of the cross.>file://figures/CardOneLine.png|width=60|label=figOneLIne+
 
@@ -247,7 +247,7 @@ Now we are ready to implement the flipped side.
 +A card with a complete backside.>file://figures/CardForFlip.png|width=60|label=figCardForFlip+
 
 Let us redefine ==drawFlippedOnCanvas:== as follows: 
-- First we ask the canvas to build font of 50. Note that for the font we specify a FreeType font (pay attention that strike font do not work and will never work in Bloc - in fact they will be removed once Pharo will be based on Bloc).
+- First we ask the canvas to build a font of size 50. Note that for the font we specify a FreeType font (pay attention that strike fonts do not work and will never work in Bloc - in fact they will be removed once Pharo is based on Bloc).
 - Then we ask the canvas to draw a text using the font with the color we want. 
 We should not forget to send the message ==draw== to the canvas. 
 
@@ -292,8 +292,8 @@ When you refresh the inspector you should see the card symbol but not centered a
 
 +Not centered letter.>file://figures/CardNotCentered.png|width=60|label=figCardNotCentered+
 
-To center well the text, we have to use exact font metrics. Bloc can support multiple graphical back-end such as Cairo, Moz2D and in the future plain openGL. There is one important constraints is that font metrics should be measured and manipulated via the same back-end abstraction. 
-For this purpose, the expression ==aCanvas text== returns a text painter and such a text painter provide access to the font measures.  Using such measure we can then get access to the text metrics and compute a better center.
+To center the text well, we have to use exact font metrics. Bloc can support multiple graphical back-end such as Cairo, Moz2D and in the future plain openGL. There is one important constraint, that is that font metrics should be measured and manipulated via the same back-end abstraction. 
+For this purpose, the expression ==aCanvas text== returns a text painter and such a text painter provides access to the font measurements.  Using such measurements we can then get access to the text metrics and compute a better center.
 
 [[[
 MgdCardElement >> drawFlippedOnCanvas: aCanvas
@@ -317,7 +317,7 @@ MgdCardElement >> drawFlippedOnCanvas: aCanvas
 ]]]
 
 With this definition we get the letter centered vertically but not horizontally. This is because 
-we have to tak into accoun the font size.
+we have to take into account the font size.
 
 [[[
 MgdCardElement >> drawFlippedOnCanvas: aCanvas
@@ -341,19 +341,19 @@ MgdCardElement >> drawFlippedOnCanvas: aCanvas
 		draw
 ]]]
 
-With this definition we get a centered letter as shown in Figure *@figCardNotCentered*.
+With this definition we get a centered letter as shown in Figure *@figCardCentered*.
 
-+Not centered letter.>file://figures/CardNotCentered.png|width=60|label=figCardNotCentered+
++Not centered letter.>file://figures/CardCentered.png|width=60|label=figCardCentered+
 
 
 Now we are ready to work on the board game.
 
 !! Adding a board view
-In the previous chapter, we defined all the card visual. We are now ready to define the game board visual.
+In the previous chapter, we defined all the card visualization. We are now ready to define the game board visualization.
 Basically we will define a new element subclass and set its layout 
 
 
-Here is a typical scenario to create the game: we create a model, and its view and we assign the model as the view's model.
+Here is a typical scenario to create the game: we create a model and its view and we assign the model as the view's model.
 
 [[[
 game := MgdGameModel numbers.
@@ -396,9 +396,9 @@ MgGameElement >> initialize
 !!! Creating cards
 
 When a model is set for a board game, we use the model information to perform the following actions: 
-- we set the number of column of the layout
+- we set the number of columns of the layout
 - we create all the card elements paying attention to set their respective model. 
-Note in particular that we add all the card graphical element as children of the board game using the message ==addChild:==.
+Note in particular that we add all the cards graphical elements as children of the board game using the message ==addChild:==.
 
 [[[
 MgdGameElement >> memoryGame: aGameModel
@@ -437,7 +437,7 @@ MgdGameElement >> initialize
 ]]]
 
 Now when we refresh our view we should get a situation close to the one presented in Figure*@figBoardOneRow*, i.e., having 
-just one row. Indeed we did never mentioned to the layout that it should layout its children according to a grid wrapping after four.
+just one row. Indeed we never mentioned to the layout that it should layout its children in to a grid, wrapping after four.
 
 +Displaying a row.>file://figures/BoardOneRow.png|width=60|label=figBoardOneRow+
 
@@ -465,8 +465,8 @@ Once the layout is set with the correct information we obtain a full board as sh
 To offer a better identification of the cards, we should add some space between each of them. 
 We achieve this by using the message ==cellSpacing:== as shown below. 
 
-We take the opportunitu to change the background color using the message ==background:==.
-Note that a background is not necessarily a color but that color is polymorphic to a color
+We take the opportunity to change the background color using the message ==background:==.
+Note that a background is not necessarily a color but that color is polymorphic to a background
 therefore the expression ==background: Color gray== is equivalent to ==background: (BlBackground fill: Color gray)==.
 
 [[[
@@ -482,10 +482,10 @@ MgdGameElement >> initialize
 
 ]]]
 
-Once this method changed, you should get a situation similar to the one described by Figure *@figBoardFullSpace*.
+Once this method is changed, you should get a situation similar to the one described by Figure *@figBoardFullSpace*.
 +Displaying a full board with space.>file://figures/BoardFullSpace.png|width=100|label=figBoardFullSpace+
 
-We are now eady for adding interation to the game. 
+We are now ready for adding interaction to the game. 
 
 
 
