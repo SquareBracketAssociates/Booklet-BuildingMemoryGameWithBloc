@@ -153,7 +153,7 @@ MgdCardElement >> onDisappear
 	
 Note that in such case, the element does not get events. It is used for layout. 
 
-
++Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=50|label=figBoardMissedPair+
 !!! Refreshing on missed pair
 
 When the player selects two cards that are not in pair, we present the two cards as shown in Figure *@figBoardMissedPair*.
@@ -179,7 +179,7 @@ In the method ==choseCard:== we see that all hte previous cards are flip (toggle
 ...
 ]]]
 		
-+Selecting two cards that are not in pair.>file://figures/BoardMissedPair.png|width=60|label=figBoardMissedPair+
+
 
 
 !!! Main interaction done	

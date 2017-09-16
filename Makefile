@@ -1,10 +1,7 @@
 MAIN := $(shell ./pillar introspect mainDocument)
 
-CHAPTERS = \
-	Chapters/AddingInteraction \
-	Chapters/MemoryGameModel \
-	Chapters/BuildingUI
 
+CHAPTERS = $(shell ./pillar introspect chapters)
 OUTPUTDIRECTORY := $(shell ./pillar introspect outputDirectory)
 LATEXTEMPLATE := $(shell ./pillar introspect latexTemplate)
 LATEXCHAPTERTEMPLATE := $(shell ./pillar introspect latexChapterTemplate)
