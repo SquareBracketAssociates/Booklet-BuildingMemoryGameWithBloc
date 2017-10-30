@@ -183,9 +183,13 @@ In the method ==choseCard:== we see that all the previous cards are flip (toggle
 +Selecting two cards that are not a pair.>file://figures/BoardMissedPair.png|width=60|label=figBoardMissedPair+
 
 
-!!! Main interaction done	
+!!! Conclusion
 
-At this stage you are done for the simple interaction. The following chapter will explain how we can add animation. 
+At this stage you are done for the simple interaction. Future versions of this document will explain how to add animations.
 
 
-!! Adding animation
+%!!! Main interaction done	
+%At this stage you are done for the simple interaction. The following chapter will explain how we can add animation. 
+
+
+%!! Adding animation
