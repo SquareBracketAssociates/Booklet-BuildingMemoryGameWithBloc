@@ -10,7 +10,7 @@ In subsequent chapters we will do the same for the game and add interaction usin
 A graphic element is a subclass of the ==BlElement==. It simply has a reference to a card model.
 
 [[[
-BlElement subclass: #MgdCardElement
+BlElement subclass: #MgdRawCardElement
 	instanceVariableNames: 'card'
 	classVariableNames: ''
 	package: 'Bloc-MemoryGame-Demo-Elements'
@@ -20,26 +20,26 @@ The message ==backgroundPaint== will be used later to customise the background o
 Let us define a nice color. 
 
 [[[
-MgdCardElement >> backgroundPaint
+MgdRawCardElement >> backgroundPaint
 	^ Color lightGray
 ]]]
 
 We mentioned the accessors since the setter will be a place to hook registration for the communication between the model and the view.
 
 [[[
-MgdCardElement >> card
+MgdRawCardElement >> card
 	^ card
 ]]]
 
 
 [[[
-MgdCardElement >> card: aMgCard
+MgdRawCardElement >> card: aMgCard
 	card := aMgCard
 ]]]
 
 We initialize it to get a
 [[[
-MgdCardElement >> initialize
+MgdRawCardElement >> initialize
 	super initialize.
 	self size: 80 @ 80.
 	self card: MgdCardModel new
@@ -50,7 +50,7 @@ MgdCardElement >> initialize
 To define the visual properties of a graphic element we redefine the method ==drawOnSpartaCanvas:==.
 
 [[[
-MgdCardElement >> drawOnSpartaCanvas: aCanvas
+MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
 	aCanvas fill 
 		paint: self backgroundPaint;
 		path: self boundsInLocal;
@@ -81,7 +81,7 @@ MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
 		draw
 ]]]
 
-+A card with circular background.>file://figures/CardCircle.png|width=100|label=figCardCircle+
++A card with circular background.>file://figures/CardCircle.png|width=60|label=figCardCircle+
 
 However, we don't want the card to be a circle either. Ideally it should be a rounded rectangle. That is why let's first add a helper method that would provide us with a corner radius:
 
@@ -90,16 +90,23 @@ MgdRawCardElement >> cornerRadius
 	^ 12
 ]]]
 
-Since for our card we would like to have a rounded rectangle so we use the ==roundedRectangle:radii:== factory message.
+Since for our card we would like to have a rounded rectangle so we use the ==roundedRectangle:radii:== factory message. However, this time, instead of just directly drawing a rounded rectangle we will fill the whole card as we did on the first step with ==background paint== and then simply ==clip== everything by rounded rectangle:
 
 [[[
 MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
-	aCanvas fill 
-		paint: self backgroundPaint;
-		path: (aCanvas shape
-			roundedRectangle: self boundsInLocal
-			radii: (BlCornerRadii radius: self cornerRadius));
-		draw
+	| roundedRectangle |
+	
+	roundedRectangle := aCanvas shape 
+		roundedRectangle: self boundsInLocal 
+		radii: (BlCornerRadii radius: self cornerRadius).
+
+	aCanvas clip
+		by: roundedRectangle
+		during: [
+			aCanvas fill
+				paint: self backgroundPaint;
+				path: self boundsInLocal;
+				draw. ]
 ]]]
 
 You should get then a visual representation close to the one shown in Figure *@figrounded*.
