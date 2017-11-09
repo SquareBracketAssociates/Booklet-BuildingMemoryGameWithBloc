@@ -42,7 +42,7 @@ We initialize it to get a
 MgdRawCardElement >> initialize
 	super initialize.
 	self size: 80 @ 80.
-	self card: MgdCardModel new
+	self card: (MgdCardModel new symbol: $a)
 ]]]
 
 !!! Starting to draw a card
@@ -232,10 +232,10 @@ You can use the inspector to get the cardElement and send it the message ==card 
 recreate a new card  as follows: 
 
 [[[
-| cardEl | 
-cardEl := MgdCardElement2 new.
-cardEl card flip.
-cardEl asSpartaForm
+| cardElement | 
+cardElement := MgdRawCardElement new.
+cardElement card flip.
+cardElement
 ]]]
 
 You should get an inspector in the situation shown in Figure *@figCardForFlip*.
@@ -243,13 +243,13 @@ Now we are ready to implement the flipped side.
 
 +A card with a complete backside.>file://figures/CardForFlip.png|width=60|label=figCardForFlip+
 
-Let us redefine ==drawFlippedOnCanvas:== as follows: 
+Let us redefine ==drawFlippedSideOn:== as follows: 
 - First we ask the canvas to build a font of size 50. Note that for the font we specify a FreeType font (pay attention that strike fonts do not work and will never work in Bloc - in fact they will be removed once Pharo is based on Bloc).
 - Then we ask the canvas to draw a text using the font with the color we want. 
 We should not forget to send the message ==draw== to the canvas. 
 
 [[[
-MgdCardElement >> drawFlippedOnCanvas: aCanvas
+MgdRawCardElement >> drawFlippedSideOn: aCanvas
 	| font |
 	font := aCanvas font
 		named: 'Source Sans Pro';
@@ -257,7 +257,7 @@ MgdCardElement >> drawFlippedOnCanvas: aCanvas
 		build.
 	aCanvas text
 		font: font;
-		paint: Color gray;
+		paint: Color white;
 		string: self card symbol asString;
 		draw
 ]]]
@@ -269,17 +269,17 @@ We are drawing the string in the corner and outside the rounded rectangle.
 Let us fix that issue by defining the baseline from which the text should be displayed.
 
 [[[
-MgdCardElement >> drawFlippedOnCanvas: aCanvas
+MgdRawCardElement >> drawFlippedSideOn: aCanvas
 	| font origin |
 	font := aCanvas font
 		named: 'Source Sans Pro';
 		size: 50;
 		build.
-	origin := self extent / 2.
+	origin := self extent / 2.0.
 	aCanvas text
 		baseline: origin;
 		font: font;
-		paint: Color paleBlue;
+		paint: Color white;
 		string: self card symbol asString;
 		draw
 ]]]
@@ -289,11 +289,11 @@ When you refresh the inspector you should see the card symbol but not centered a
 
 +Not centered letter.>file://figures/CardNotCentered.png|width=60|label=figCardNotCentered+
 
-To center the text well, we have to use exact font metrics. Bloc can support multiple graphical back-end such as Cairo, Moz2D and in the future plain openGL. There is one important constraint, that is that font metrics should be measured and manipulated via the same back-end abstraction. 
+To center the text well, we have to use exact font metrics. Bloc can support multiple graphical back-end such as Cairo, Moz2D and in the future plain OpenGL. There is one important constraint, that is that font metrics should be measured and manipulated via the same back-end abstraction. 
 For this purpose, the expression ==aCanvas text== returns a text painter and such a text painter provides access to the font measurements.  Using such measurements we can then get access to the text metrics and compute a better center.
 
 [[[
-MgdCardElement >> drawFlippedOnCanvas: aCanvas
+MgdRawCardElement >> drawFlippedSideOn: aCanvas
 	| font origin textPainter metrics |
 	font := aCanvas font
 		named: 'Source Sans Pro';
@@ -302,22 +302,24 @@ MgdCardElement >> drawFlippedOnCanvas: aCanvas
 
 	textPainter := aCanvas text
 		font: font;
-		paint: Color paleBlue;
+		paint: Color white;
 		string: self card symbol asString.
 	
 	metrics := textPainter measure. 
 	
-	origin := (self extent - metrics textMetrics bounds extent) / 2.
+	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
 	textPainter 
 		baseline: origin;
 		draw
 ]]]
 
-With this definition we get the letter centered vertically but not horizontally. This is because 
+With this definition we get the letter centered horizontally but not vertically as shown in Figure *@figCardCenteredHorizontally*. This is because 
 we have to take into account the font size.
 
++Horizontally centered letter.>file://figures/CardCenteredHorizontally.png|width=60|label=figCardCenteredHorizontally+
+
 [[[
-MgdCardElement >> drawFlippedOnCanvas: aCanvas
+MgdRawCardElement >> drawFlippedSideOn: aCanvas
 	| font origin textPainter metrics |
 	font := aCanvas font
 		named: 'Source Sans Pro';
@@ -326,12 +328,12 @@ MgdCardElement >> drawFlippedOnCanvas: aCanvas
 
 	textPainter := aCanvas text
 		font: font;
-		paint: Color paleBlue;
+		paint: Color white;
 		string: self card symbol asString.
 
 	metrics := textPainter measure. 
 
-	origin := (self extent - metrics textMetrics bounds extent) / 2.
+	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
 	origin := origin - metrics textMetrics bounds origin.
 	textPainter 
 		baseline: origin;
