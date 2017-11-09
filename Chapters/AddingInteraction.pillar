@@ -13,7 +13,7 @@ sent by the model.
 BlElementEventListener subclass: #MgdCardEventListener
 	instanceVariableNames: 'memoryGame'
 	classVariableNames: ''
-	package: 'Bloc-MemoryGame-Tutorial'
+	package: 'Bloc-MemoryGame-Demo-Elements'
 ]]]
 
 We add an instance variable ==memoryGame== holding a game model to the listener because 
@@ -36,7 +36,7 @@ MgdCardEventListener >> clickEvent: anEvent
 
 !!! Adding event listeners
 
-Now we should add the game event listener to each card because we want to know which card will be clicked and pass this 
+Now we should add the card event listener to each card because we want to know which card will be clicked and pass this 
 information to the game model.
 
 
@@ -45,19 +45,26 @@ MgdGameElement >> newCardEventListener
 	^ MgdCardEventListener new
 ]]]
 
+For that we have to extend ==#memoryGame:== model setter in ==MgdGameElement== as follows by adding a card event listener to every card element using ==#addEventHandler:==: 
+
 [[[
-MgdGameElement >> memoryGame: aGameModel
-	memoryGame := aGameModel.
+MgdGameElement >> memoryGame: aMgdGameModel
+	| aCardEventListener |
+	
+	memoryGame := aMgdGameModel.
+	aCardEventListener := self newCardEventListener memoryGame: aMgdGameModel.
+	
 	self layout columnCount: memoryGame gridSize.
+	
 	memoryGame availableCards
 		do: [ :aCard | 
 			| cardElement |
 			cardElement := self newCardElement card: aCard.
-			cardElement addEventHandler: (self newCardEventListener memoryGame: aGameModel).
+			cardElement addEventHandler: aCardEventListener.
 			self addChild: cardElement ]
 ]]]
 
-
+Please note, that in our case we can reuse the same event handler for all card elements. It allows us to reduce overall memory consumption and improve game initialisation time.
 
 +Debugging the clickEvent: anEvent method.>file://figures/ClickWithDebugger.png|width=100|label=figBoardFull+
 
@@ -65,11 +72,10 @@ MgdGameElement >> memoryGame: aGameModel
 Now the preview is not enough and we should create a window and embedded the game element. 
 Then when you click on an card you should get a debugger as shown in Figure *@figBoardFull*.
 [[[
-| space grid game |
 space := BlSpace new.
-space extent: 420@420. 
+space extent: 420@420.  
 game := MgdGameModel numbers.
-grid := MgdGameElement2 new.
+grid := MgdGameElement new.
 grid memoryGame: game. 
 space root addChild: grid.
 space show 
