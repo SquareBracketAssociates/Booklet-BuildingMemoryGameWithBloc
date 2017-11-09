@@ -190,11 +190,11 @@ Now we are ready to define the backside of our card. We will start by drawing a 
 The shape factory encapsulates the logic of shapes. This is what we do below with the expression ==path: (aCanvas shape line: 0 @ 0 to: self extent)==. The message ==shape== returns a ShapeFactory and we ask this factory to produce a path to produce a line. 
 
 [[[
-MgdCardElement >> drawBacksideOn: aCanvas
+MgdRawCardElement >> drawBacksideOn: aCanvas
 	aCanvas stroke
 		paint: Color paleBlue;
-		path: (aCanvas shape line: 0 @ 0 to: self extent);
-		draw
+		path: (aCanvas shape line: 0@0 to: self extent);
+		draw.
 ]]]
 
 
@@ -202,61 +202,28 @@ Once this method is defined, refresh the inspector and you should get a card as 
 
 +A rounded card with half of the cross.>file://figures/CardOneLine.png|width=60|label=figOneLIne+
 
+!!! Full cross
 
-
-
-
-
-!!! Lines and corners reconciled
-
-In Figure *@figOneLIne* we see that the line is not clipped to the corners. We should address this. 
-This is the way we did it for now. 
+Now we can add the second line to build a full cross. Our solution is defined as follows: 
 
 [[[
-MgdCardElement >> drawBacksideOn: aCanvas
-	| radiusOffset |
-	radiusOffset := 12 / Float pi.
+MgdRawCardElement >> drawBacksideOn: aCanvas
 	aCanvas stroke
-		paint: Color gray;
-		width: 3;
-		path: (aCanvas shape 
-				line: radiusOffset @ radiusOffset 
-				to: self extent - radiusOffset);
+		paint: Color paleBlue;
+		path: (aCanvas shape line: 0@0 to: self extent);
+		draw.
+
+	aCanvas stroke
+		paint: Color paleBlue;
+		path: (aCanvas shape line: self width @ 0 to: 0@self height);
 		draw
 ]]]
 
-Once you change the method ==drawBacksideOn:== and refresh you should get a card as displayed in Figure *@figClipped*.
-+Clipping line.>file://figures/CardClipped.png|width=60|label=figClipped+
 
-!!! Full cross clipped
-
-Now we can add the line to build a full cross. Our solution is defined as follows: 
-
-[[[
-MgdCardElement >> drawBacksideOn: aCanvas
-	| radiusOffset |
-	radiusOffset := 12 / Float pi.
-	aCanvas stroke
-		paint: Color paleBlue;
-		width: 3;
-		path: (aCanvas shape 
-				line: radiusOffset @ radiusOffset 
-				to: self extent - radiusOffset);
-		draw.
-	aCanvas stroke
-		paint: Color paleBlue;
-		width: 3; 
-		path: (aCanvas shape
-				line: (self width - radiusOffset) @ radiusOffset 
-				to: radiusOffset @ (self height - radiusOffset));
-		draw 
-]]]
-
-
-+A card with a complete backside.>file://figures/CardFullyClipped.png|width=60|label=figFullClipped+
++A card with a complete backside.>file://figures/CardCross.png|width=60|label=figCardCross+
 
 Now our backside is fully implemented and when you refresh your view, you should get the card 
-as shown in Figure *@figFullClipped*. 
+as shown in Figure *@figCardCross*. 
 
 
 !!! Flipped side 
