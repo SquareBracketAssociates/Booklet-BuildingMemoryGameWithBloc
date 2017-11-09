@@ -121,37 +121,65 @@ You should get then a visual representation close to the one shown in Figure *@f
 We define now two methods 
 
 [[[
-MgdCardElement >> drawBacksideOn: aCanvas
+MgdRawCardElement >> drawBacksideOn: aCanvas
 	"nothing for now"
 ]]]
 
 [[[
-MgdCardElement >> drawFlippedOnCanvas: aCanvas
+MgdRawCardElement >> drawFlippedSideOn: aCanvas
 	"nothing for now"
 ]]]
 
-And we refactor ==drawPathOnSpartaCanvas:== as follows: 
+And we refactor ==drawOnSpartaCanvas:== as follows: 
+
+[[[
+MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
+	| roundedRectangle |
+	
+	roundedRectangle := aCanvas shape 
+		roundedRectangle: self boundsInLocal 
+		radii: (BlCornerRadii radius: self cornerRadius).
+
+	aCanvas clip
+		by: roundedRectangle
+		during: [
+			aCanvas fill
+				paint: self backgroundPaint;
+				path: self boundsInLocal;
+				draw.
+				
+			self card isFlipped
+				ifTrue: [ self drawFlippedSideOn: aCanvas ]
+				ifFalse: [ self drawBacksideOn: aCanvas ] ]
+
+]]]
+
 we extract the common part into a separate method. 
 [[[
-MgdCardElement >> drawCommonOnCanvas: aCanvas
-	| radius |
-	super drawPathOnSpartaCanvas: aCanvas.
-	radius := 12.
+MgdRawCardElement >> drawCommonOn: aCanvas
 	aCanvas fill
-		paint: self backgroundColor;
-		path: (aCanvas shape roundedRectangle: self boundsInLocal radii: (BlCornerRadii radius: 12));
-		draw.
+		paint: self backgroundPaint;
+		path: self boundsInLocal;
+		draw
 ]]]
 
-Finally, ==drawPathOnSpartaCanvas:== logic is at the same conceptual level. 
+Finally, ==drawOnSpartaCanvas:== logic is at the same conceptual level. 
 
 [[[
-MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
-	super drawPathOnSpartaCanvas: aCanvas.
-	self drawCommonOnCanvas: aCanvas.
-	self card flipped
-		ifTrue: [ self drawFlippedOnCanvas: aCanvas ]
-		ifFalse: [ self drawBacksideOn: aCanvas ]
+MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
+	| roundedRectangle |
+	
+	roundedRectangle := aCanvas shape 
+		roundedRectangle: self boundsInLocal 
+		radii: (BlCornerRadii radius: self cornerRadius).
+
+	aCanvas clip
+		by: roundedRectangle
+		during: [
+			self drawCommonOn: aCanvas.
+			self card isFlipped
+				ifTrue: [ self drawFlippedSideOn: aCanvas ]
+				ifFalse: [ self drawBacksideOn: aCanvas ] ]
 ]]]
 
 Now we are ready to implement the backside and flipped side
