@@ -84,7 +84,7 @@ After you loaded the BlocTutorials project, you will get two new packages: ==Blo
 !! Game model insights
 Before starting with the actual graphical elements, we first need a model for our game.
 This game model will be used as a model in the typical Model View architecture.
-One the one hand, the model does not communicate directly with the graphical elements;
+On the one hand, the model does not communicate directly with the graphical elements;
 all communication is done via announcements. On the other hand, the graphic elements are 
 communicating directly with the model.
 
@@ -146,7 +146,7 @@ MgdCardModel >> disappear
 !!! Adding notification
 The notification is implemented as follows in the ==notifyFlipped== and ==notifyDisappear== methods. 
 They simply announce events of type ==MgdCardFlippedAnnouncement== and ==MgdCardDisappearAnnouncement==. 
-The graphical elements will have to register subscriptions for these announcements as we will see later.
+The graphical elements will have to register subscriptions to these announcements as we will see later.
 
 [[[
 MgdCardModel >> notifyFlipped
@@ -155,7 +155,6 @@ MgdCardModel >> notifyFlipped
 
 [[[
 MgdCardModel >> notifyDisappear
-	"Notify all observers that I disappeared from the game"
 	self announcer announce: MgdCardDisappearAnnouncement new
 ]]]
 
@@ -198,7 +197,7 @@ Object subclass: #MgdGameModel
 	package: 'Bloc-MemoryGame-Demo-Model'
 ]]]
 
-The ==initialize== method set two collections for the different cards.
+The ==initialize== method sets two collections for the different cards.
 [[[
 MgdGameModel >> initialize
 	super initialize.
@@ -235,7 +234,7 @@ MgdGameModel >> cardsCount
 
 !!! Initialization
 To initialize the game with cards we add a dedicated method, ==initializeForSymbols:==. 
-This method creates a list of cards from a list of characters and shuffle it. 
+This method creates a list of cards from a list of characters and shuffles it. 
 We also add an assertion in this method to verify that the caller provided enough characters.
 
 [[[
@@ -295,8 +294,8 @@ MgdGameModel >>	completeStep
 
 
 The current step should be reset if the player selected a third card. This will happen when a player already
-selected two cards that did not match and clicked on a third one. In this situation the two initialcards will be
-flipped back. The list of selecte cards will only contain the third card.
+selected two cards that did not match and clicked on a third one. In this situation the two initial cards will be
+flipped back. The list of selected cards will only contain the third card.
 
 [[[
 MgdGameModel >> shouldResetStep 
