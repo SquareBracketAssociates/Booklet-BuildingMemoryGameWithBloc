@@ -71,39 +71,41 @@ MgdRawCardElement new
 Instead of displaying a full rectangle, we want a better visual. 
 Bloc offers a shape factory. This shape factory returns shape path (lines, rectangle, ellipse, circle...) that can be passed to the canvas using the message ==path:==. Other shapes can be easily added. 
 
-For example with the following expression ==path: (aCanvas shape ellipse: self boundsInLocal)== we draw now a circle since the bounds of the receiver returns a square of 80. 
+For example with the following expression ==path: (aCanvas shape ellipse: self boundsInLocal)== we draw now a circle since the bounds of the receiver returns a square of 80. Result is shown in Figure *@figCardCircle*:
 
 [[[
-MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
-	
-	| radius |
-	super drawPathOnSpartaCanvas: aCanvas.
-	radius := 12.
+MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
 	aCanvas fill 
-		paint: self backgroundColor;
+		paint: self backgroundPaint;
 		path: (aCanvas shape ellipse: self boundsInLocal);
 		draw
 ]]]
 
-For our card we would like to have a rounded rectangle so we use the ==roundedRectangle:radii:== factory message.
++A card with circular background.>file://figures/CardCircle.png|width=100|label=figCardCircle+
+
+However, we don't want the card to be a circle either. Ideally it should be a rounded rectangle. That is why let's first add a helper method that would provide us with a corner radius:
 
 [[[
-MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
-	
-	| radius |
-	super drawPathOnSpartaCanvas: aCanvas.
-	radius := 12.
+MgdRawCardElement >> cornerRadius
+	^ 12
+]]]
+
+Since for our card we would like to have a rounded rectangle so we use the ==roundedRectangle:radii:== factory message.
+
+[[[
+MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
 	aCanvas fill 
-		paint: self backgroundColor;
-		path: (aCanvas shape roundedRectangle: (self boundsInLocal)
-		radii: (BlCornerRadii radius: 12));
+		paint: self backgroundPaint;
+		path: (aCanvas shape
+			roundedRectangle: self boundsInLocal
+			radii: (BlCornerRadii radius: self cornerRadius));
 		draw
 ]]]
 
-You should get then a visual representation close to the one shown in Figure *@figrounded1*.
+You should get then a visual representation close to the one shown in Figure *@figrounded*.
 
 
-+A rounded card.>file://figures/CardRounded1.png|width=60|label=figrounded1+
++A rounded card.>file://figures/CardRounded.png|width=60|label=figrounded+
 
 
 
