@@ -13,18 +13,18 @@ A graphic element is a subclass of the ==BlElement==. It simply has a reference 
 BlElement subclass: #MgdCardElement
 	instanceVariableNames: 'card'
 	classVariableNames: ''
-	package: 'Bloc-MemoryGame-Tutorial'
+	package: 'Bloc-MemoryGame-Demo-Elements'
 ]]]
 
-The message ==backgroundColor== is one of the customisation hooks defined in ==BlElement==. 
+The message ==backgroundPaint== will be used later to customise the background of our card element.
 Let us define a nice color. 
 
 [[[
-MgdCardElement >> backgroundColor
-	^ Color lightBlue
+MgdCardElement >> backgroundPaint
+	^ Color lightGray
 ]]]
 
-We mentioned the accessors since the setter will be place to hook registration for the communication between the model and the view.
+We mentioned the accessors since the setter will be a place to hook registration for the communication between the model and the view.
 
 [[[
 MgdCardElement >> card
@@ -33,13 +33,13 @@ MgdCardElement >> card
 
 
 [[[
-MgdCardElement >> 	card: aMgCard
-		card := aMgCard
+MgdCardElement >> card: aMgCard
+	card := aMgCard
 ]]]
 
 We initialize it to get a
 [[[
-MgdCardElement >> 	initialize
+MgdCardElement >> initialize
 	super initialize.
 	self size: 80 @ 80.
 	self card: MgdCardModel new
@@ -47,31 +47,24 @@ MgdCardElement >> 	initialize
 
 !!! Starting to draw a card
 
-To define the visual properties of a graphic element we redefine the method ==drawPathOnSpartaCanvas:==.
-
-(This method will be renamed ==drawPathOn:== in the future).
+To define the visual properties of a graphic element we redefine the method ==drawOnSpartaCanvas:==.
 
 [[[
-MgdCardElement >> drawPathOnSpartaCanvas: aCanvas
-
-	super drawPathOnSpartaCanvas: aCanvas.
+MgdCardElement >> drawOnSpartaCanvas: aCanvas
 	aCanvas fill 
-		paint: self backgroundColor;
+		paint: self backgroundPaint;
 		path: self boundsInLocal;
 		draw
 ]]]
 
-Note that if we forget to send the message draw the canvas will be set but it will not display the result. 
+Note, that if we forget to send the message ==draw== the canvas will be set but it will not display the result. 
 
-Now to see the result in Morphic we have to get a spartaForm as follows:
+Now to see the result in Morphic we can inspect our card element in Playground (==CMD+g==) and switch to ==Live== presentation as shown in Figure *@figInspecting0*:
 [[[
-MgdRawCardElement new asSpartaForm
+MgdRawCardElement new
 ]]]
 
-You can also use the the inspector as shown in Figure *@figInspecting0*. Here we create and inspect the graphic element and then we ask for its form and look at it in the Morph pane (this is what the Preview pane is actually doing).
-
 +A first extremely basic representation of face down card.>file://figures/Inspecting0.png|width=100|label=figInspecting0+
-
 
 !!! Improving the card visual 
 
