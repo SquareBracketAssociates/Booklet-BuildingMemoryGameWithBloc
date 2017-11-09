@@ -349,26 +349,26 @@ Now we are ready to work on the board game.
 
 !! Adding a board view
 In the previous chapter, we defined all the card visualization. We are now ready to define the game board visualization.
-Basically we will define a new element subclass and set its layout 
+Basically we will define a new element subclass and set its layout.
 
 
 Here is a typical scenario to create the game: we create a model and its view and we assign the model as the view's model.
 
 [[[
 game := MgdGameModel numbers.
-grid := MgdGameElement2 new.
+grid := MgdGameElement new.
 grid memoryGame: game. 
 ]]]
 
 !!! The GameElement class
 Let us define the class ==MgdGameElement== that will represent the game board. 
-As for the ==CardElement==, it inherits from the ==BlElement== class. 
+As for the ==MgdRawCardElement==, it inherits from the ==BlElement== class. 
 This view object holds a reference to the game model.
 [[[
 BlElement subclass: #MgdGameElement
 	instanceVariableNames: 'memoryGame'
 	classVariableNames: ''
-	package: 'Bloc-MemoryGame-Tutorial'
+	package: 'Bloc-MemoryGame-Demo-Elements'
 ]]]
 
 We define the ==memoryGame:== setter method. We will extend it just after to 
@@ -409,7 +409,7 @@ MgdGameElement >> memoryGame: aGameModel
 
 [[[	
 MgdGameElement >> newCardElement
-	^ MgdCardElement new
+	^ MgdRawCardElement new
 ]]]
 
 
@@ -430,9 +430,9 @@ MgdGameElement >> initialize
 	super initialize.
 	self layout: BlGridLayout horizontal.
 	self
-		constraintsDo: [ :layoutCons | 
-			layoutCons horizontal fitContent.
-			layoutCons vertical fitContent ]
+		constraintsDo: [ :aLayoutConstrants | 
+			aLayoutConstraints horizontal fitContent.
+			aLayoutConstraints vertical fitContent ]
 ]]]
 
 Now when we refresh our view we should get a situation close to the one presented in Figure*@figBoardOneRow*, i.e., having 
@@ -466,18 +466,17 @@ We achieve this by using the message ==cellSpacing:== as shown below.
 
 We take the opportunity to change the background color using the message ==background:==.
 Note that a background is not necessarily a color but that color is polymorphic to a background
-therefore the expression ==background: Color gray== is equivalent to ==background: (BlBackground fill: Color gray)==.
+therefore the expression ==background: Color gray darker== is equivalent to ==background: (BlBackground paint: Color gray darker)==.
 
 [[[
 MgdGameElement >> initialize
 	super initialize.
-	self layout: BlGridLayout horizontal.
-	self layout cellSpacing: 7.
-	self background: (BlBackground fill: Color gray).
+	self background: (BlBackground paint: Color gray darker).
+	self layout: (BlGridLayout horizontal cellSpacing: 20).
 	self
-		constraintsDo: [ :layoutCons | 
-			layoutCons horizontal fitContent.
-			layoutCons vertical fitContent ]
+		constraintsDo: [ :aLayoutConstraints | 
+			aLayoutConstraints horizontal fitContent.
+			aLayoutConstraints vertical fitContent ]
 
 ]]]
 
@@ -485,6 +484,3 @@ Once this method is changed, you should get a situation similar to the one descr
 +Displaying a full board with space.>file://figures/BoardFullSpace.png|width=100|label=figBoardFullSpace+
 
 We are now ready for adding interaction to the game. 
-
-
-
