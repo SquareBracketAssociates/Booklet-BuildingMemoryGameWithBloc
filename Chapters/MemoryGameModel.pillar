@@ -16,13 +16,13 @@ they are removed and the player gets a point. If not, they are both flipped.
 
 For example, Figure *@figmemoryExample0* shows the game after the first selection 
 of two cards. Face-down cards are represented with a cross and turned cards are 
-just showing a number. Figure *@figmemoryExample1* show the same game after a few 
+just showing a number. Figure *@figmemoryExample1* shows the same game after a few 
 rounds. While this game can be played by multiple playes, in this turorial we will 
 build a game with just one player. 
 
 +The game after the player selected two cards: faced-down cards are represented with a cross and turned card with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
 
-To start with, here is the code that builds and launches the game:
+Our goal is to have a functional game with the model and simple graphical user interface. __In the end__, the following code should be able to build, initialise and launch the game:
 
 [[[
 game := MgdGameModel new initializeForSymbols: '12345678'.
@@ -35,7 +35,7 @@ space root addChild: grid.
 space show 
 ]]]
 
-- first, we create a grame model and ask to get the numbers from 1 to 8 associated with the cards. By default a game model has a size of 4 by 4, which requires eight different cards.
+- first, we create a game model and ask to get the numbers from 1 to 8 associated with the cards. By default a game model has a size of 4 by 4, which requires eight different cards.
 - Second, we create a graphical game element.
 - Third, we assign the model of the game to the UI. 
 - Finally, we create a graphical space in which we place the game UI and we display the space. 
@@ -45,26 +45,26 @@ space show
 
 !!! Getting started
 
-This tutorial is for Pharo 60 running on the latest Pharo60 Virtual machine.
+This tutorial is for Pharo 6.1 (==https://pharo.org/download==) running on the latest Pharo6.1 Virtual machine.
 You can get them at the following address
 
 [[[
-http://get.pharo.org/60+vm
+http://get.pharo.org/61+vm
 ]]]
 
 Alternatively, you can download them by executing the line below on a Linux or MacOs system:
 
 [[[
-wget -O- get.pharo.org/60+vm | bash
+wget -O- get.pharo.org/61+vm | bash
 ]]]
 
-To load Bloc execute the following snippet:
+To load Bloc execute the following snippet in Pharo Playground:
 
 [[[
 Metacello new
-    baseline: 'Bloc';
-    repository: 'github://pharo-graphics/Bloc/src';
-    load: #core.
+   baseline: 'Bloc';
+   repository: 'github://pharo-graphics/Bloc:pharo6.1/src';
+   load: #core
 ]]]
 
 !!! Loading the Memory Game
@@ -156,10 +156,10 @@ MgdCardModel >> notifyFlipped
 [[[
 MgdCardModel >> notifyDisappear
 	"Notify all observers that I disappeared from the game"
-	self announcer announce: MgCardDisappearAnnouncement new
+	self announcer announce: MgdCardDisappearAnnouncement new
 ]]]
 
-Here, ==MgdCardFlippedAnnouncement== and ==MgCardDisappearAnnouncement== are just subclasses of ==Announcement==.
+Here, ==MgdCardFlippedAnnouncement== and ==MgdCardDisappearAnnouncement== are just subclasses of ==Announcement==.
 
 [[[
 Announcement subclass: #MgdCardFlippedAnnouncement
@@ -236,7 +236,7 @@ MgdGameModel >> cardsCount
 !!! Initialization
 To initialize the game with cards we add a dedicated method, ==initializeForSymbols:==. 
 This method creates a list of cards from a list of characters and shuffle it. 
-We also add an assertion in this method to verify that the called provided enough characters.
+We also add an assertion in this method to verify that the caller provided enough characters.
 
 [[[
 MgdGameModel >> initializeForSymbols: characters
@@ -265,10 +265,10 @@ MgdGameModel >> chooseCard: aCard
 		ifTrue: [ ^ self ].
 	self chosenCards add: aCard.
 	aCard flip.
-	self shouldCompleteStep ifTrue: [
-		^ self completeStep ].
-	self shouldResetStep ifTrue: [
-		self resetStep ]
+	self shouldCompleteStep
+		ifTrue: [ ^ self completeStep ].
+	self shouldResetStep
+		ifTrue: [ self resetStep ]
 ]]]
 
 The current step is completed if the player selected the right amount of cards and they all show the same symbol.
