@@ -64,12 +64,12 @@ Now to see the result in Morphic we can inspect our card element in Playground (
 MgdRawCardElement new
 ]]]
 
-+A first extremely basic representation of face down card.>file://figures/Inspecting0.png|width=100|label=figInspecting0+
++A first extremely basic representation of face down card.>file://figures/Inspecting0.png|width=60|label=figInspecting0+
 
 !!! Improving the card visual 
 
 Instead of displaying a full rectangle, we want a better visual. 
-Bloc offers a shape factory. This shape factory returns shape path (lines, rectangle, ellipse, circle...) that can be passed to the canvas using the message ==path:==. Other shapes can be easily added. 
+==Sparta== canvas offers a shape factory. This shape factory returns shape path (lines, rectangle, ellipse, circle...) that can be passed to the canvas using the message ==path:==. Other shapes can be easily added. 
 
 For example with the following expression ==path: (aCanvas shape ellipse: self boundsInLocal)== we draw now a circle since the bounds of the receiver returns a square of 80. Result is shown in Figure *@figCardCircle*:
 
@@ -187,7 +187,7 @@ Now we are ready to implement the backside and flipped side
 !!! Adding a cross
 
 Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should provide it as a path. In Bloc this can be done by either passing a Path object or by asking the canvas for its shape factory. 
-The shape factory encapsulates the logic of shapes. This is what we do below with the expression ==path: (aCanvas shape line: 0 @ 0 to: self extent)==. The message ==shape== returns a ShapeFactory and we ask this factory to produce a path to produce a line. 
+The shape factory encapsulates the logic of shapes. This is what we do below with the expression ==path: (aCanvas shape line: 0 @ 0 to: self extent)==. The message ==shape== returns a ShapeFactory and we ask this factory to produce a line path. 
 
 [[[
 MgdRawCardElement >> drawBacksideOn: aCanvas
@@ -241,7 +241,7 @@ cardElement
 You should get an inspector in the situation shown in Figure *@figCardForFlip*.
 Now we are ready to implement the flipped side. 
 
-+A card with a complete backside.>file://figures/CardForFlip.png|width=60|label=figCardForFlip+
++A flipped card without any visuals.>file://figures/CardForFlip.png|width=60|label=figCardForFlip+
 
 Let us redefine ==drawFlippedSideOn:== as follows: 
 - First we ask the canvas to build a font of size 50. Note that for the font we specify a FreeType font (pay attention that strike fonts do not work and will never work in Bloc - in fact they will be removed once Pharo is based on Bloc).
@@ -387,7 +387,7 @@ MgdGameElement >> memoryGame
 During the object initialization we set the layout (i.e., how sub elements are placed inside their container).
 Here we define the layout to be a grid layout and we set it as horizontal.
 [[[
-MgGameElement >> initialize
+MgdGameElement >> initialize
 	super initialize.
 	self layout: BlGridLayout horizontal.
 ]]]
@@ -436,7 +436,7 @@ MgdGameElement >> initialize
 ]]]
 
 Now when we refresh our view we should get a situation close to the one presented in Figure*@figBoardOneRow*, i.e., having 
-just one row. Indeed we never mentioned to the layout that it should layout its children in to a grid, wrapping after four.
+just one row. Indeed we never mentioned to the layout that it should layout its children into a grid, wrapping after four.
 
 +Displaying a row.>file://figures/BoardOneRow.png|width=60|label=figBoardOneRow+
 
@@ -456,7 +456,7 @@ MgdGameElement >> memoryGame: aGameModel
 
 Once the layout is set with the correct information we obtain a full board as shown in Figure *@figBoardFull*.
 
-+Displaying a full board.>file://figures/BoardFull.png|width=100|label=figBoardFull+
++Displaying a full board.>file://figures/BoardFull.png|width=60|label=figBoardFull+
 
 
 !!! Separating cards
@@ -481,6 +481,6 @@ MgdGameElement >> initialize
 ]]]
 
 Once this method is changed, you should get a situation similar to the one described by Figure *@figBoardFullSpace*.
-+Displaying a full board with space.>file://figures/BoardFullSpace.png|width=100|label=figBoardFullSpace+
++Displaying a full board with space.>file://figures/BoardFullSpace.png|width=60|label=figBoardFullSpace+
 
 We are now ready for adding interaction to the game. 
