@@ -101,14 +101,14 @@ Now we show how the domain communicates with the user interface: the domain emit
 using announcements but it does not refer to the UI elements. It is the visual elements that should register to the notifications and react accordingly.
 
 
-Let us first define two simple methods in the class ==CardElement== just producing a trace.
+Let us first define two simple methods in the class ==MgdRawCardElement== just producing a trace.
 [[[
-MgdCardElement >> onDisappear
+MgdRawCardElement >> onDisappear
 	Transcript show: 'On disappear'; cr
 ]]]
 
 [[[
-MgdCardElement >> onFlipped
+MgdRawCardElement >> onFlipped
 	Transcript show: 'On flipped'; cr
 ]]]
 
@@ -116,7 +116,7 @@ Now we can modify the setter so that when a card model is set to a card graphica
 In the following method, we make sure that on notifications we invoke the trace methods just defined. 
 
 [[[
-MgdCardElement >> card: aMgCard
+MgdRawCardElement >> card: aMgCard
 	card := aMgCard.
 	card announcer when: MgdCardFlippedAnnouncement send: #onFlipped to: self.
 	card announcer when: MgdCardDisappearAnnouncement send: #onDisappear to: self
@@ -129,7 +129,7 @@ the graphics engine that one element should be redrawn.
 
 
 [[[
-MgdCardElement >> onFlipped
+MgdRawCardElement >> onFlipped
 	Transcript show: 'On flipped'; cr.
 	self invalidate
 ]]]
@@ -140,10 +140,9 @@ There are two ways to implement the disappear of a card, either setting the opac
 to 0. 
 
 [[[
-MgdCardElement >> onDisappear
+MgdRawCardElement >> onDisappear
 	Transcript show: 'On disappear'; cr.
-	self opacity: 0.
-	self invalidate
+	self opacity: 0
 ]]]
 
 Note that the element is still present and receive events. 
@@ -151,10 +150,9 @@ Note that the element is still present and receive events.
 Or changing the visibility as follows:
 
 [[[
-MgdCardElement >> onDisappear
+MgdRawCardElement >> onDisappear
 	Transcript show: 'On disappear'; cr.
-	self visibility: BlVisibility hidden.
-	self invalidate. "not needed in the latest Bloc"
+	self visibility: BlVisibility hidden
 ]]]
 	
 Note that in the last case the element does not get events. It is used for layout. 
@@ -168,21 +166,23 @@ Now the clicking on another card will flip back the previous cards.
 Remember a card when flipped in either sense will raise a notification. 
 
 [[[
-MgdCardElement >> flipped: aBoolean
+MgdCardModel >> flip
 	flipped := aBoolean.
 	self notifyFlipped
 ]]]
 
-In the method ==choseCard:== we see that all the previous cards are flip (toggled).
+In the method ==#resetStep== we see that all the previous cards are flipped (toggled).
 
 [[[
-...
-(self chosenCards size > self matchesCount)
-	ifTrue: [ 
-		self chosenCards allButLastDo: [ :each | each flip ].
-		self chosenCards removeAll.
-		self chosenCards add: aMgCard ]
-...
+MgdGameModel >> resetStep
+	| lastCard |
+
+	lastCard := self chosenCards  last.
+
+	self chosenCards 
+		allButLastDo: [ :aCard | aCard flip ];
+		removeAll;
+		add: lastCard
 ]]]
 		
 
