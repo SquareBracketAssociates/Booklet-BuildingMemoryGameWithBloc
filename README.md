@@ -12,4 +12,3 @@ look here for more [Books and Booklets](http://books.pharo.org/)
 
 The result from the latest successful Travis build can be found [on Bintray (PDF)](https://bintray.com/squarebracketassociates/wip/download_file?file_path=memorygame-wip.pdf).
 
-You can find the pdf at [https://ci.inria.fr/pharo-contribution/view/Books/job/Booklet-BlocMemoryGame/] [https://ci.inria.fr/pharo-contribution/view/Books/job/Booklet-BlocMemoryGame/]
