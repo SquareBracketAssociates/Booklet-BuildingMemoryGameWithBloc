@@ -1,28 +1,26 @@
 !! Objectives of this book
 
-Bloc's design is getting stable and this book is a first tutorial on Bloc.
-Some elements may change such as the name of certain methods, but most of these changes
-will be minor.
+Now that Bloc's design is stabilizing, this book presents its first tutorial.
+Future changes should mostly be minor (e.g. method renaming).
 
-In this tutorial you will build a memory game. We provide the model and focus on creating the UI of the game. 
+In this tutorial you will build a memory game. Given a provided model of a game, we will focus on creating a UI for it.
 
 
 !!! Memory game
 
 Let us have a look at what we want to build with you: a simple Memory game. 
-In a memory game players need to find pairs of similar cards. In each round 
+In a memory game, players need to find pairs of similar cards. In each round 
 a player turns over two cards at a time. If the two cards show the same symbol 
-they are removed and the player gets a point. If not, they are both flipped. 
+they are removed and the player gets a point. If not, they are both returned facedown. 
 
 For example, Figure *@figmemoryExample0* shows the game after the first selection 
-of two cards. Face-down cards are represented with a cross and turned cards are 
-just showing a number. Figure *@figmemoryExample1* shows the same game after a few 
-rounds. While this game can be played by multiple playes, in this turorial we will 
+of two cards. Facedown cards are represented with a cross and turned cards show their number. Figure *@figmemoryExample1* shows the same game after a few 
+rounds. While this game can be played by multiple players, in this tutorial we will 
 build a game with just one player. 
 
-+The game after the player selected two cards: faced-down cards are represented with a cross and turned card with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
++The game after the player has selected two cards: facedown cards are represented with a cross and turned card with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
 
-Our goal is to have a functional game with the model and simple graphical user interface. __In the end__, the following code should be able to build, initialise and launch the game:
+Our goal is to have a functional game with a model and simple graphical user interface. __In the end__, the following code should be able to build, initialize and launch the game:
 
 [[[
 game := MgdGameModel new initializeForSymbols: '12345678'.
@@ -35,30 +33,30 @@ space root addChild: grid.
 space show 
 ]]]
 
-- first, we create a game model and ask to get the numbers from 1 to 8 associated with the cards. By default a game model has a size of 4 by 4, which requires eight different cards.
+- First, we create a game model and ask to associate the numbers from 1 to 8 with the cards. By default, a game model has a size of 4 by 4, which fits eight pairs of numbered cards.
 - Second, we create a graphical game element.
 - Third, we assign the model of the game to the UI. 
-- Finally, we create a graphical space in which we place the game UI and we display the space. 
+- Finally, we create and display a graphical space in which we place the game UI. 
  
  
-+Another state of the memory game after the player correctly matched two pairs.>file://figures/memoryExample1.png|width=60|label=figmemoryExample1+
++Another state of the memory game after the player has correctly matched two pairs.>file://figures/memoryExample1.png|width=60|label=figmemoryExample1+
 
 !!! Getting started
 
-This tutorial is for Pharo 6.1 (==https://pharo.org/download==) running on the latest Pharo6.1 Virtual machine.
-You can get them at the following address
+This tutorial is for Pharo 6.1 (==https://pharo.org/download==) running on the latest compatible Virtual machine.
+You can get them at the following address:
 
 [[[
 http://get.pharo.org/61+vm
 ]]]
 
-Alternatively, you can download them by executing the line below on a Linux or MacOs system:
+Alternatively, you can download them by executing the line below on a Linux or MacOS system:
 
 [[[
 wget -O- get.pharo.org/61+vm | bash
 ]]]
 
-To load Bloc execute the following snippet in Pharo Playground:
+To load Bloc, execute the following snippet in a Pharo Playground:
 
 [[[
 Metacello new
@@ -69,7 +67,7 @@ Metacello new
 
 !!! Loading the Memory Game
 
-To make the demo easier to follow and help you if you get lost we already made a full implementation of the game. You can load it using the following code:
+To make the demo easier to follow and help you if you get lost, we already made a full implementation of the game. You can load it using the following code:
 
 [[[
 Metacello new
@@ -78,23 +76,23 @@ Metacello new
     load
 ]]]
 
-After you loaded the BlocTutorials project, you will get two new packages: ==Bloc-MemoryGame== and ==Bloc-MemoryGame-Demo==. ==Bloc-MemoryGame== contains the full implementation of the game. Just to the class side of ==MgExamples== and click on the gree triangle next to the ==open==method to start the game. ==Bloc-MemoryGame-Demo== is a skeleton for the game that we will use in this tutorial.
+After you have loaded the BlocTutorials project, you will get two new packages: ==Bloc-MemoryGame== and ==Bloc-MemoryGame-Demo==. ==Bloc-MemoryGame== contains the full implementation of the game. Just browse to the class side of ==MgExamples== and click on the green triangle next to the ==open== method to start the game. ==Bloc-MemoryGame-Demo== contains a skeleton of the game that we will use in this tutorial.
 
 
 !! Game model insights
 Before starting with the actual graphical elements, we first need a model for our game.
-This game model will be used as a model in the typical Model View architecture.
+This game model will be used as the Model in the typical Model View architecture.
 On the one hand, the model does not communicate directly with the graphical elements;
 all communication is done via announcements. On the other hand, the graphic elements are 
 communicating directly with the model.
 
-In the remainder of this chapter we describe the game model in details. If you want to move directly to
-building graphical elements using Bloc, the package ==Bloc-MemoryGame-Demo== already contains the model.
+In the remainder of this chapter we describe the game model in detail. If you want to move directly to
+building graphical elements using Bloc, you can find this model in the package ==Bloc-MemoryGame-Demo==.
 
 
 !!! Reviewing the card model
 
-Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not, and an announcer to emit state changes. This object could also be a subclass of Model which already provide announcer management. 
+Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not, and an announcer to emit state changes. This object could also be a subclass of Model which already provides announcer management. 
 
 [[[
 Object subclass: #MgdCardModel
@@ -158,7 +156,7 @@ MgdCardModel >> notifyDisappear
 	self announcer announce: MgdCardDisappearAnnouncement new
 ]]]
 
-Here, ==MgdCardFlippedAnnouncement== and ==MgdCardDisappearAnnouncement== are just subclasses of ==Announcement==.
+Here, ==MgdCardFlippedAnnouncement== and ==MgdCardDisappearAnnouncement== are subclasses of ==Announcement==.
 
 [[[
 Announcement subclass: #MgdCardFlippedAnnouncement
@@ -188,7 +186,7 @@ MgdCardModel >> printOn: aStream
 
 !!! Reviewing the game model
 
-The game model is simple: it keeps the tracks of all the available cards and all the cards currently selected by the player. 
+The game model is simple: it keeps track of all the available cards and all the cards currently selected by the player. 
 
 [[[
 Object subclass: #MgdGameModel
@@ -197,7 +195,7 @@ Object subclass: #MgdGameModel
 	package: 'Bloc-MemoryGame-Demo-Model'
 ]]]
 
-The ==initialize== method sets two collections for the different cards.
+The ==initialize== method sets up two collections for the cards.
 [[[
 MgdGameModel >> initialize
 	super initialize.
@@ -214,15 +212,15 @@ MgdGameModel >> chosenCards
 ]]]
 
 !!! Grid size and card number
-We hardcode for now the size of the grid and of the number of cards that need to be matched by a player.
+For now, we'll hardcode the size of the grid and the number of cards that need to be matched by a player.
 [[[
 MgdGameModel >> gridSize
-	"Return grid size, total amount of card is gridSize^2"
+	"Return grid size, total amount of cards is gridSize^2"
 	^ 4
 ]]]
 [[[
 MgdGameModel >> matchesCount
-	"How many choosen cards should match in order for them to disappear"
+	"How many chosen cards should match in order for them to disappear"
 	^ 2
 ]]]
 [[[
@@ -233,7 +231,7 @@ MgdGameModel >> cardsCount
 
 
 !!! Initialization
-To initialize the game with cards we add a dedicated method, ==initializeForSymbols:==. 
+To initialize the game with cards, we add an ==initializeForSymbols:== method. 
 This method creates a list of cards from a list of characters and shuffles it. 
 We also add an assertion in this method to verify that the caller provided enough characters.
 
@@ -250,13 +248,12 @@ MgdGameModel >> initializeForSymbols: characters
 ]]]
 
 !!! Game logic
-Next we need ==chooseCard:==, a method that will be called when a user selects a card. 
+Next, we need ==chooseCard:==, a method that will be called when a user selects a card. 
 This method is actually the most complex method of the model and implements the main
-logic of the game. First, the method makes sure that the seleted card is not already selected.
-This could happen if the view uses animations that give players the chance to click on the card more then once.
+logic of the game. First, the method makes sure that the chosen card is not already selected.
+This could happen if the view uses animations that gives the player the chance to click on a card more then once.
 Next, the card is flipped by sending it the message ==flip==. 
-Finally, depending on the actual state of the game the step is complete and the selected cards removed, 
-or all selected cards are flipped back.
+Finally, depending on the actual state of the game, the step is complete and the selected cards are either removed or flipped back.
 
 [[[
 MgdGameModel >> chooseCard: aCard
@@ -316,10 +313,9 @@ MgdGameModel >> resetStep
 
 We are now ready to start building the game view.
 
-Since Bloc is still under development, it may happen that you will get exceptions after which graphical 
-elements do not render correctly. In that case the Universe has to be reinitialized. 
+Since Bloc is still under development, it may happen that you will get exceptions that cause graphical 
+elements to render incorrectly. In that case, reinitialize the Universe via: 
 
 [[[
 BlUniverse reset
 ]]]
-

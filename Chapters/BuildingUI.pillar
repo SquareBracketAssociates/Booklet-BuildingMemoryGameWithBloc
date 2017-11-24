@@ -1,13 +1,13 @@
 !! Building card graphical elements
 
-In this chapter we will build step by step the visual appearance of the cards.
-In Bloc visual objects are called elements and usually you define a subclass of ==BlElement==, the inheritance tree root.
+In this chapter we will build the visual appearance of the cards step by step.
+In Bloc, visual objects are called elements, which are usually subclasses of ==BlElement==, the inheritance tree root.
 In subsequent chapters we will do the same for the game and add interaction using event listeners.
 
 !!! First: the card element
 
 
-A graphic element is a subclass of the ==BlElement==. It simply has a reference to a card model.
+Our graphic element representing a card will be a subclass of the ==BlElement== which has a reference to a card model.
 
 [[[
 BlElement subclass: #MgdRawCardElement
@@ -16,7 +16,7 @@ BlElement subclass: #MgdRawCardElement
 	package: 'Bloc-MemoryGame-Demo-Elements'
 ]]]
 
-The message ==backgroundPaint== will be used later to customise the background of our card element.
+The message ==backgroundPaint== will be used later to customize the background of our card element.
 Let us define a nice color. 
 
 [[[
