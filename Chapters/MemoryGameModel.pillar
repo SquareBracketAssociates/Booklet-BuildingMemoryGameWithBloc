@@ -18,7 +18,7 @@ of two cards. Facedown cards are represented with a cross and turned cards show 
 rounds. While this game can be played by multiple players, in this tutorial we will 
 build a game with just one player. 
 
-+The game after the player has selected two cards: facedown cards are represented with a cross and turned card with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
++The game after the player has selected two cards: facedown cards are represented with a cross and turned cards with their number.>file://figures/memoryExample0.png|width=60|label=figmemoryExample0+
 
 Our goal is to have a functional game with a model and simple graphical user interface. __In the end__, the following code should be able to build, initialize and launch the game:
 
