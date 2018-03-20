@@ -71,7 +71,7 @@ MgdRawCardElement new
 Instead of displaying a full rectangle, we want a better visual. 
 ==Sparta== canvas offers a shape factory. This shape factory returns shape path (lines, rectangle, ellipse, circle...) that can be passed to the canvas using the message ==path:==. Other shapes can be easily added. 
 
-For example with the following expression ==path: (aCanvas shape ellipse: self boundsInLocal)== we draw now a circle since the bounds of the receiver returns a square of 80. Result is shown in Figure *@figCardCircle*:
+For example with the following expression ==path: (aCanvas shape ellipse: self boundsInLocal)== we now draw a circle since the bounds of the receiver returns a square of 80. Result is shown in Figure *@figCardCircle*:
 
 [[[
 MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
@@ -83,14 +83,14 @@ MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
 
 +A card with circular background.>file://figures/CardCircle.png|width=60|label=figCardCircle+
 
-However, we don't want the card to be a circle either. Ideally it should be a rounded rectangle. That is why let's first add a helper method that would provide us with a corner radius:
+However, we don't want the card to be a circle either. Ideally it should be a rounded rectangle. So let's first add a helper method that would provide us with a corner radius:
 
 [[[
 MgdRawCardElement >> cornerRadius
 	^ 12
 ]]]
 
-Since for our card we would like to have a rounded rectangle so we use the ==roundedRectangle:radii:== factory message. However, this time, instead of just directly drawing a rounded rectangle we will fill the whole card as we did on the first step with ==background paint== and then simply ==clip== everything by rounded rectangle:
+We would like to have a rounded rectangle so we use the ==roundedRectangle:radii:== factory message. However, this time, instead of just directly drawing a rounded rectangle we will fill the whole card as we did on the first step with ==background paint== and then simply ==clip== everything by rounded a rectangle:
 
 [[[
 MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
@@ -227,8 +227,7 @@ as shown in Figure *@figCardCross*.
 
 
 !!! Flipped side 
-Now we are ready to develop the flipped side of the card. To see if we should change the card model. 
-You can use the inspector to get the cardElement and send it the message ==card flip== or directly 
+Now we are ready to develop the flipped side of the card. To see if we should change the card model you can use the inspector to get the cardElement and send it the message ==card flip== or directly 
 recreate a new card  as follows: 
 
 [[[
@@ -342,7 +341,7 @@ MgdRawCardElement >> drawFlippedSideOn: aCanvas
 
 With this definition we get a centered letter as shown in Figure *@figCardCentered*.
 
-+Not centered letter.>file://figures/CardCentered.png|width=60|label=figCardCentered+
++Centered letter.>file://figures/CardCentered.png|width=60|label=figCardCentered+
 
 
 Now we are ready to work on the board game.
@@ -371,8 +370,8 @@ BlElement subclass: #MgdGameElement
 	package: 'Bloc-MemoryGame-Demo-Elements'
 ]]]
 
-We define the ==memoryGame:== setter method. We will extend it just after to 
-create all the cards element. 
+We define the ==memoryGame:== setter method. We will extend it to create
+all the card elements shortly. 
 
 [[[
 MgdGameElement >> memoryGame: aMgdGameModel
@@ -397,7 +396,7 @@ MgdGameElement >> initialize
 When a model is set for a board game, we use the model information to perform the following actions: 
 - we set the number of columns of the layout
 - we create all the card elements paying attention to set their respective model. 
-Note in particular that we add all the cards graphical elements as children of the board game using the message ==addChild:==.
+Note in particular that we add all the card graphical elements as children of the board game using the message ==addChild:==.
 
 [[[
 MgdGameElement >> memoryGame: aGameModel
