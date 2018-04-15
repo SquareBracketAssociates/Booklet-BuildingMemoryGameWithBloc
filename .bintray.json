@@ -18,7 +18,7 @@
 
     "files": [
         {
-            "includePattern": "build/(memorygame).spiral.pdf",
+            "includePattern": "-result/pdf/(memorygame).pdf",
             "uploadPattern": "$1-wip.pdf",
             "matrixParams": { "override": 1 }
         }
