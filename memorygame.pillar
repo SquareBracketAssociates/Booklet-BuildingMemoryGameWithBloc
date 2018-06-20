@@ -1,7 +1,7 @@
 
 
-${inputFile:value=Chapters/MemoryGameModel.pillar}$
+${inputFile:path=Chapters/MemoryGameModel.pillar}$
 
-${inputFile:value=Chapters/BuildingUI.pillar}$
+${inputFile:path=Chapters/BuildingUI.pillar}$
 
-${inputFile:value=Chapters/AddingInteraction.pillar}$
+${inputFile:path=Chapters/AddingInteraction.pillar}$
