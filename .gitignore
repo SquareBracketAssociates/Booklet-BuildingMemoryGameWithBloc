@@ -8,3 +8,4 @@ pharo-vm/
 *.mcz
 *.auctex
 .DS_Store
+_result
