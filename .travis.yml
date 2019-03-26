@@ -24,15 +24,6 @@ install:
 script:
   - ./pillar/build/pillar build pdf
 
-deploy:
-- provider: bintray
-  file: .bintray.json
-  on:
-    repo: SquareBracketAssociates/Booklet-BuildingMemoryGameWithBloc
-  skip_cleanup: true
-  user: ducasse
-  key:
-    secure: Dl19bSLer76VRU5QgI8AFaopGusOyC7NDtjGyaoBR4UmvxxSHh1OERKdcjaWr9IdbpmiUtKqKsit8Kmz4x+tJNFjEQ+jjSAw0syKD5nd7YcD3w8IbD1fFcq68FVGWwmzGl63CzS/4QwgkWnsvYCg40zeP3wE9RcUIifleJwPoIP/CUEo01Q/satdiHLlRJsdMOyVWdD2PUfRQWrd3jQkklNMvB1LRozTZCcj/VqJVlPVt7Xp8LDwsd0NWDSTkCBy0f9sd+C62gpL4gRWNPIcm1lUdwrO09Tv2nAWAm3m8ro3W+/RVZSwMm+j0E3lwGX0WY1yIn00hdJzEwelpHtTeLnJqHlfuBl3S9973FFIFCBMQBjbZyf3Hq61Fa6DIOvWVj0WmKHZ/TYdcXCaCTXrdxBykEYzPrTsiQsmIKBCwHh/REMoBUARjlgoVPkJSySVX5/ncXpOx2aNWyGg3Ec2WSIypT4TBgXtFFqNB4k+n7IfN8PPWx6u7GViXkKSD4ouTOcOtaWD6KqARIBHaUNxqVF/uzESDlQpDkMjCwYNMeVCJf3t0F0RF3VlUMytsE8HLk/kdSmRu22+jqMV+9re4FqjimOJiCk8cc4ym4ABsRRyb7YzNyhwxYWHK16Tml/lkCeUQUUFrly6z3tomRUrPh9Euoo59r5Sy7gbhayuBN0=
 - provider: releases
   file: build/book.spiral.pdf
   on:
@@ -40,3 +31,12 @@ deploy:
   skip_cleanup: true
   api_key:
     secure: pRfu3fr35BzqQDi1ul0SubPSwO8zcyIidqLRZPz3XIrH4qoy1Zgnq785dmB7ziNQqH+VJyh7askSFY3JLxL0d4P0eUgj2ZDIOhJsUQQ/ihevOBWbxlMOoEPjQfzA11l8WrNCQ566KrcYiISRi7bCg698kPTWSRwOmmvqXOJe5zGkuUbVmMNUV2oxaNV4JC8kVyVWHYy0nNMLEX/hzRZRh1+8K34/ds+fZ7irLrbDWMbKGHCyuLCSqv+zJJdu99nWLTclrCxFzK4DEHaMlFiO7wkUpyQLwZ38EDnb3E7iv045jSqCx3XB+DMRG1Da2/9BIXl0mho5ELdEvfGVAbjI2no5FWd0H1cs4/banAePCFnM7ZscJBaPWgVajB7EzrcADJUoxpmU6+6n1aIC3CnjscfAHqSAKGv8CO/Jh+Uirc8ATRpSqa73f2Nnj9tRCqwCOnFOCEzu0w5l3Ppz2Qpif04P+QbebZehSVaBJ4W01R2i8Rac3IuZDhZVaek1X24HFxUOd/rvHpbhz8eeANdnsWCTkAm+0sD+iKsWKICRMxFZfCK/SPldAcjXZsOsEMTqfx7ZWyCc7GeesQWcmW+z3shziyQd9tdeArJWLwacly3hH3WeyuUD5JyPF9klvDBtHgTVajdU4yp+3oXsrtTmetnBz+RESxQGdLgZRlQBQog=
+	
+after_success:
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - mv _result/pdf/memorygame.pdf MemoryGame-wip.pdf
+  - bash upload.sh MemoryGame-wip.pdf
+
+branches:
+  except:
+    - /^(?i:continuous)$/
