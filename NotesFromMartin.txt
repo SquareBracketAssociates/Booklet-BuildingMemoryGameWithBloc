@@ -1,0 +1,92 @@
+---
+My notes:
+
+
+filename: "2017-11-09-memorygame.pdf"
+
+---
+p7:
+
+Rename MgdGameModel -> MGGame, and there is `withNumbers` doing the same initialization, then:
+`MgdGameModel new initializeForSymbols: '12345678'.`
+May be: 
+`MGGame withNumbers`
+
+Also `MgdGameElement` -> `MGGameElement`
+
+
+p8:
+
+"Pharo 6.1"
+
+
+p9:
+
+Update old packages and classes names.
+
+
+p15:
+
+Old mention to BlUniverse... use BlParallelUniverse?
+"Since Bloc is still under development", I'd remove this warning, that was also done at the beginning of this chapter.
+
+
+p18:
+
+Update inspector.
+
+
+p22:
+
+(And before in this chapter) I see the iteratiive improvements coexisting in MGCardElement>>#drawOnSpartaCanvas3: and similar.
+
+Now I realize that Stef arrived until this point on his new implementation. The "3.7 Flipped side" was not implemented yet.
+
+
+p23:
+
+outdated comment: "in fact they will be removed once Pharo is based on Bloc"
+
+
+p24: 
+
+probably to update: "Cairo, Moz2D and in the future plain OpenGL."
+
+
+p26:
+
+wrong: "Figure 3-9 Not centered letter." (it IS centered)
+
+
+p27:
+
+#numbers method is renamed as withNumbers
+
+
+p29:
+
+- I realize that Stef implemented just until before "4.3 Updating the container to its children"
+- Typo: "aLayoutConstrants"
+
+
+p31:
+
+Nothing implemented from this chapter. The listener was a loading problem of the original code. I reported about that: https://github.com/pharo-graphics/Tutorials/issues/2.
+
+
+p32:
+
+Remove #root (not needed)
+
+
+p33:
+
+- Paragraph misising before? "It means that the memory game model is changed but we do not see" makes no sense.
+- Unreferenced: "Figure 5-2 Tracing registration to the domain notifications."
+- In fact, in my code it works (with bug)
+
+
+end:
+
+Aha! now I see the book is unfinished.
+
