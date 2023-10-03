@@ -71,13 +71,13 @@ MgdGameElement >> memoryGame: aMgdGameModel
 ```
 
 
-Please note, that in our case we can reuse the same event handler for all card elements. It allows us to reduce overall memory consumption and improve game initialisation time.
+Please note, that in our case we can reuse the same event handler for all card elements. It allows us to reduce overall memory consumption and improve game initialization time.
 
 ![Debugging the clickEvent: anEvent method.](figures/ClickWithDebugger.png width=100&label=figBoardFull)
 
 
 Now the preview is not enough and we should create a window and embed the game element. 
-Then when you click on an card you should get a debugger as shown in Figure *@figBoardFull@*.
+Then when you click on a card you should get a debugger as shown in Figure *@figBoardFull@*.
 ```
 space := BlSpace new.
 space extent: 420@420.  
@@ -92,7 +92,7 @@ space show
 
 ### Specialize clickEvent:
 
-Now we can specialise the `clickEvent:` method as follows: 
+Now we can specialize the `clickEvent:` method as follows: 
 - We get the graphical element that receives the mouse click using the message `currentTarget`. The message `currentTarget` returns the element that receives an event.
 - From this graphical card we access the card model and we pass this card model to the game model. 
 
@@ -103,7 +103,7 @@ MgdCardEventListener >> clickEvent: anEvent
 ```
 
 
-It means that the memory game model is changed but we do not see the visual effect of our actions. Indeed this is normal. We never made sure that visual elements are listening to model changes.  This is what we will do in the following chapter. 
+It means that the memory game model is changed but we do not see the visual effect of our actions. Indeed this is normal. We never made sure that visual elements were listening to model changes.  This is what we will do in the following chapter. 
 
 
 
@@ -155,7 +155,7 @@ MgdRawCardElement >> onFlipped
 
 There are two ways to implement the disappearance of a card:
 Either setting the opacity of the element to 0
-\(Note that the element is still present and receives events.\),
+(Note that the element is still present and receives events.)
 
 ```
 MgdRawCardElement >> onDisappear
@@ -173,7 +173,7 @@ MgdRawCardElement >> onDisappear
 ```
 
 	
-Note that in the latter case the element no longer receives events.
+Note that in the latter case, the element no longer receives events.
 It is used for layout. 
 
 ![Selecting two cards that are not in pair.](figures/BoardMissedPair.png width=50&label=figBoardMissedPair)
@@ -181,7 +181,7 @@ It is used for layout.
 
 
 When the player selects two cards that are not a pair, we present the two cards as shown in Figure *@figBoardMissedPair@*.
-Now the clicking on another card will flip back the previous cards. 
+Now clicking on another card will flip back the previous cards. 
 
 Remember, a card will raise a notification when flipped in either direction. 
 

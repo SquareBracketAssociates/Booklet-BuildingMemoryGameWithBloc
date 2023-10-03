@@ -2,8 +2,7 @@
 
 
 In this chapter we will build the visual appearance of the cards step by step.
-In Bloc, visual objects are called elements, which are usually subclasses of `BlElement`, the inheritance tree root.
-In subsequent chapters we will do the same for the game and add interaction using event listeners.
+In Bloc, visual objects are called elements, which are usually subclasses of `BlElement`, the inheritance tree root. In subsequent chapters we will do the same for the game and add interaction using event listeners.
 
 ### First: the card element
 
@@ -79,7 +78,7 @@ MgdRawCardElement new
 Instead of displaying a full rectangle, we want a better visual. 
 `Sparta` canvas offers a shape factory. This shape factory returns shape path \(lines, rectangle, ellipse, circle...\) that can be passed to the canvas using the message `path:`. Other shapes can be easily added. 
 
-For example with the following expression `path: (aCanvas shape ellipse: self boundsInLocal)` we now draw a circle since the bounds of the receiver returns a square of 80. Result is shown in Figure *@figCardCircle@*:
+For example with the following expression `path: (aCanvas shape ellipse: self boundsInLocal)` we now draw a circle since the bounds of the receiver returns a square of 80. The result is shown in Figure *@figCardCircle@*:
 
 ```
 MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
@@ -92,7 +91,7 @@ MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
 
 ![A card with circular background.](figures/CardCircle.png width=60&label=figCardCircle)
 
-However, we don't want the card to be a circle either. Ideally it should be a rounded rectangle. So let's first add a helper method that would provide us with a corner radius:
+However, we don't want the card to be a circle either. Ideally, it should be a rounded rectangle. So let's first add a helper method that would provide us with a corner radius:
 
 ```
 MgdRawCardElement >> cornerRadius
@@ -100,7 +99,7 @@ MgdRawCardElement >> cornerRadius
 ```
 
 
-We would like to have a rounded rectangle so we use the `roundedRectangle:radii:` factory message. However, this time, instead of just directly drawing a rounded rectangle we will fill the whole card as we did on the first step with `background paint` and then simply `clip` everything by rounded a rectangle:
+We would like to have a rounded rectangle so we use the `roundedRectangle:radii:` factory message. However, this time, instead of just directly drawing a rounded rectangle we will fill the whole card as we did on the first step with `background paint` and then simply `clip` everything by rounding a rectangle:
 
 ```
 MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
@@ -203,7 +202,7 @@ Now we are ready to implement the backside and flipped side
 ### Adding a cross
 
 
-Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should provide it as a path. In Bloc this can be done by either passing a Path object or by asking the canvas for its shape factory. 
+Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should provide it as a path. In Bloc, this can be done by either passing a Path object or by asking the canvas for its shape factory. 
 The shape factory encapsulates the logic of shapes. This is what we do below with the expression `path: (aCanvas shape line: 0 @ 0 to: self extent)`. The message `shape` returns a ShapeFactory and we ask this factory to produce a line path. 
 
 ```
@@ -248,7 +247,7 @@ as shown in Figure *@figCardCross@*.
 
 ### Flipped side 
 
-Now we are ready to develop the flipped side of the card. To see if we should change the card model you can use the inspector to get the cardElement and send it the message `card flip` or directly 
+Now we are ready to develop the flipped side of the card. To see if we should change the card model you can use the inspector to get the card element and send it the message `card flip` or directly 
 recreate a new card  as follows: 
 
 ```
@@ -265,7 +264,7 @@ Now we are ready to implement the flipped side.
 ![A flipped card without any visuals.](figures/CardForFlip.png width=60&label=figCardForFlip)
 
 Let us redefine `drawFlippedSideOn:` as follows: 
-- First we ask the canvas to build a font of size 50. Note that for the font we specify a FreeType font \(pay attention that strike fonts do not work and will never work in Bloc - in fact they will be removed once Pharo is based on Bloc\).
+- First, we ask the canvas to build a font of size 50. Note that for the font we specify a FreeType font (pay attention that strike fonts do not work and will never work in Bloc - in fact they will be removed once Pharo is based on Bloc).
 - Then we ask the canvas to draw a text using the font with the color we want. 
 
 We should not forget to send the message `draw` to the canvas. 
@@ -313,7 +312,7 @@ When you refresh the inspector you should see the card symbol but not centered a
 
 ![Not centered letter.](figures/CardNotCentered.png width=60&label=figCardNotCentered)
 
-To center the text well, we have to use exact font metrics. Bloc can support multiple graphical back-end such as Cairo, Moz2D and in the future plain OpenGL. There is one important constraint, that is that font metrics should be measured and manipulated via the same back-end abstraction. 
+To center the text well, we have to use exact font metrics. Bloc can support multiple graphical back-ends such as Cairo and in the future plain OpenGL. There is one important constraint, which is that font metrics should be measured and manipulated via the same back-end abstraction. 
 For this purpose, the expression `aCanvas text` returns a text painter and such a text painter provides access to the font measurements.  Using such measurements we can then get access to the text metrics and compute a better center.
 
 ```
@@ -366,7 +365,7 @@ MgdRawCardElement >> drawFlippedSideOn: aCanvas
 ```
 
 
-With this definition we get a centered letter as shown in Figure *@figCardCentered@*.
+With this definition, we get a centered letter as shown in Figure *@figCardCentered@*.
 
 ![Centered letter.](figures/CardCentered.png width=60&label=figCardCentered)
 
@@ -376,7 +375,7 @@ Now we are ready to work on the board game.
 ## Adding a board view
 
 In the previous chapter, we defined all the card visualization. We are now ready to define the game board visualization.
-Basically we will define a new element subclass and set its layout.
+Basically, we will define a new element subclass and set its layout.
 
 
 Here is a typical scenario to create the game: we create a model and its view and we assign the model as the view's model.
@@ -415,7 +414,7 @@ MgdGameElement >> memoryGame
 ```
 
 
-During the object initialization we set the layout \(i.e., how sub elements are placed inside their container\).
+During the object initialization, we set the layout \(i.e., how sub-elements are placed inside their container\).
 Here we define the layout to be a grid layout and we set it as horizontal.
 ```
 MgdGameElement >> initialize

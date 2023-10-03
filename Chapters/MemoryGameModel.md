@@ -4,14 +4,14 @@
 Now that Bloc's design is stabilizing, this book presents its first tutorial.
 Future changes should mostly be minor \(e.g. method renaming\).
 
-In this tutorial you will build a memory game. Given a provided model of a game, we will focus on creating a UI for it.
+In this tutorial, you will build a memory game. Given a provided model of a game, we will focus on creating a UI for it.
 
 
 ### Memory game
 
 
 Let us have a look at what we want to build with you: a simple Memory game. 
-In a memory game, players need to find pairs of similar cards. In each round 
+In a memory game, players need to find pairs of similar cards. In each round, 
 a player turns over two cards at a time. If the two cards show the same symbol 
 they are removed and the player gets a point. If not, they are both returned facedown. 
 
@@ -22,7 +22,7 @@ build a game with just one player.
 
 ![The game after the player has selected two cards: facedown cards are represented with a cross and turned cards with their number.](figures/memoryExample0.png width=60&label=figmemoryExample0)
 
-Our goal is to have a functional game with a model and simple graphical user interface. In the end, the following code should be able to build, initialize and launch the game:
+Our goal is to have a functional game with a model and a simple graphical user interface. In the end, the following code should be able to build, initialize, and launch the game:
 
 ```
 game := MgdGameModel new initializeForSymbols: '12345678'.
@@ -36,7 +36,7 @@ space show
 ```
 
 
-- First, we create a game model and ask to associate the numbers from 1 to 8 with the cards. By default, a game model has a size of 4 by 4, which fits eight pairs of numbered cards.
+- First, we create a game model and ask you to associate the numbers from 1 to 8 with the cards. By default, a game model has a size of 4 by 4, which fits eight pairs of numbered cards.
 - Second, we create a graphical game element.
 - Third, we assign the model of the game to the UI. 
 - Finally, we create and display a graphical space in which we place the game UI. 
@@ -88,14 +88,14 @@ On the one hand, the model does not communicate directly with the graphical elem
 all communication is done via announcements. On the other hand, the graphic elements are 
 communicating directly with the model.
 
-In the remainder of this chapter we describe the game model in detail. If you want to move directly to
+In the remainder of this chapter, we describe the game model in detail. If you want to move directly to
 building graphical elements using Bloc, you can find this model in the package `Bloc-MemoryGame-Demo`.
 
 
 ### Reviewing the card model
 
 
-Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not, and an announcer to emit state changes. This object could also be a subclass of Model which already provides announcer management. 
+Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not, and an announcer that emits state changes. This object could also be a subclass of Model which already provides announcer management. 
 
 ```
 Object << #MgdCardModel
@@ -275,7 +275,7 @@ MgdGameModel >> initializeForSymbols: characters
 Next, we need `chooseCard:`, a method that will be called when a user selects a card. 
 This method is actually the most complex method of the model and implements the main
 logic of the game. First, the method makes sure that the chosen card is not already selected.
-This could happen if the view uses animations that gives the player the chance to click on a card more then once.
+This could happen if the view uses animations that give the player the chance to click on a card more than once.
 Next, the card is flipped by sending it the message `flip`. 
 Finally, depending on the actual state of the game, the step is complete and the selected cards are either removed or flipped back.
 
@@ -292,7 +292,7 @@ MgdGameModel >> chooseCard: aCard
 ```
 
 
-The current step is completed if the player selected the right amount of cards and they all show the same symbol.
+The current step is completed if the player selects the right amount of cards and they all show the same symbol.
 In this case, all selected cards receive the message `disappear` and are removed from the list of selected cards.
 
 ```
@@ -318,8 +318,8 @@ MgdGameModel >> completeStep
 
 
 
-The current step should be reset if the player selected a third card. This will happen when a player already
-selected two cards that did not match and clicked on a third one. In this situation, the two initial cards will be
+The current step should be reset if the player selects a third card. This will happen when a player already
+selected two cards that do not match and clicks on a third one. In this situation, the two initial cards will be
 flipped back. The list of selected cards will only contain the third card.
 
 ```
