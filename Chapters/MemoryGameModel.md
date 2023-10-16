@@ -343,10 +343,3 @@ MgdGameModel >> resetStep
 
 
 We are now ready to start building the game view.
-
-Since Bloc is still under development, it may happen that you will get exceptions that cause graphical 
-elements to render incorrectly. In that case, reinitialize the Universe via: 
-
-```
-BlUniverse reset
-```
