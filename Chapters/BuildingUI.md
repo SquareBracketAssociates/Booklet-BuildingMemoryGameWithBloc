@@ -133,7 +133,7 @@ We can now define the method that will draw our card
 ```
 MgdRawCardElement >> drawCardElement
 
-	^ self card isFlipped
+	self card isFlipped
 		  ifTrue: [ self drawFlippedSide ]
 		  ifFalse: [ self drawBackSide ]
 ```
@@ -155,11 +155,17 @@ Another particularity of open geometries is that they don't fit well with defaul
 ```
 MgdRawCardElement >> initializeFirstLine
 
-	^ BlElement new
-		  geometry: (BlLineGeometry from: 0 @ 0 to: self extent);
-		  border: (BlBorder paint: Color lightGreen width: 5);
-		  outskirts: BlOutskirts centered
+	| line |
+	line := BlElement new
+		        border: (BlBorder paint: Color lightGreen width: 3);
+			geometry: BlLineGeometry new;
+		        outskirts: BlOutskirts centered.
+	line
+		when: BlElementLayoutComputedEvent
+		do: [ :e | line geometry from: 0 @ 0 to: line parent extent ].
+	^ line
 ```
+The message `when:do:` is used here to wait for the line parent to be drawn for the line to be defined, otherwise the `line parent extent` will be 0@0 and our line will not be displayed. 
 
 We can redefine `drawBackSide` and add the line we just created.
 
@@ -184,27 +190,26 @@ BlElement << #MgdRawCardElement
 	slots: { #card #backSide };
 	package: 'Bloc-MemoryGame-Demo-Elements'
 ```
-
-```
-MgdRawCardElement >> backSide
-	^ backSide
-```
-
 ```
 MgdRawCardElement >> backSide: aBlElement
 	backside := aBlElement
 ```
 
+Before creating the getter of backside, we will create the method that will be responsible for adding the two lines together as a cross `initializeBackSide`. Let's start by creating the second line the same way we created the first one.
+
+
 ```
 MgdRawCardElement >> initializeSecondLine
 
-	^ BlElement new
-		  geometry:
-			  (BlLineGeometry from: 0 @ self height to: self width @ 0);
-		  border: (BlBorder paint: Color lightGreen width: 5);
-		  outskirts: BlOutskirts centered
+	| line |
+	line := BlElement new
+		        border: (BlBorder paint: Color lightGreen width: 3);
+			geometry: BlLineGeometry new;
+		        outskirts: BlOutskirts centered.
+	line when: BlElementLayoutComputedEvent do: [ :e |
+		line geometry from: 0 @ line parent height to: line parent width @ 0 ].
+	^ line
 ```
-
 ```
 MgdRawCardElement >> initializeBackSide
 
@@ -212,10 +217,33 @@ MgdRawCardElement >> initializeBackSide
 	firstLine := self initializeFirstLine.
 	secondLine := self initializeSecondLine.
 
-	cross := BlElement new addChildren: {
-			         firstLine.
-			         secondLine }.
-	self backSide: cross
+	cross := BlElement new
+		         addChildren: {
+				         firstLine.
+				         secondLine };
+		         constraintsDo: [ :c |
+			         c horizontal matchParent.
+			         c vertical matchParent ].
+
+	^ cross
+```
+
+Our backside is then an Element holding both lines, we tell this element to match its parent using constraints, meaning the element size will scale according to the parent size, this also makes our lines defined to the correct points. 
+
+We can now define the backSide getter but with a little twist, using lazy initialization. This will create our element only when accessed the first time and not right after the initialization of the card element. This concept is very useful in certain situations and is great to know in case you need it, we define it as such :
+
+
+```
+MgdRawCardElement >> backSide
+	^ backSide ifNil: [ self initializeBackSide ]
+```
+
+We can finally redefine `drawBackSide` and call it in our initialization to draw our backside when the card is created. 
+
+```
+MgdRawCardElement >> drawBackSide
+	self removeChildren.
+	self addChild: self backSide
 ```
 
 ```
@@ -227,7 +255,7 @@ MgdRawCardElement >> initialize
 	self geometry:
 		(BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
 	self card: (MgdCardModel new symbol: $a).
-	self initializeBackSide.
+	self drawCardElement.
 ```
 
 
@@ -269,12 +297,7 @@ BlElement << #MgdRawCardElement
 ```
 MgdRawCardElement >> flippedSide
 
-	^ flippedSide
-```
-```
-MgdRawCardElement >> text: aBlElement
-
-	flippedSide := aBlElement
+	^ flippedSide ifNil: [ self initializeFlippedSide ]
 ```
 
 We can now create the method that will create the text for the flipped side, this method will be called during initialization.
@@ -287,18 +310,7 @@ MgdRawCardElement >> initializeFlippedSide
 	elt text fontName: 'Source Sans Pro'.
 	elt text fontSize: 50.
 	elt text foreground: Color white.
-	self flippedSide: elt
-```
-```
-MgdRawCardElement >> initialize
-
-	super initialize.
-	self size: 80 @ 80.
-	self background: self backgroundPaint.
-	self geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
-	self card: (MgdCardModel new symbol: $a).
-	self initializeBackSide.
-	self initializeFlippedSide.
+	^ elt
 ```
 
 Now we can redefine `drawFlippedSide` to add our text element as a child of our card element
@@ -306,6 +318,7 @@ Now we can redefine `drawFlippedSide` to add our text element as a child of our 
 ```
 MgdRawCardElement >> drawFlippedSide
 
+	self removeChildren.
 	self addChild: self flippedSide
 ```
 
@@ -326,8 +339,7 @@ MgdRawCardElement >> initialize
 	self geometry:
 		(BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
 	self card: (MgdCardModel new symbol: $a).
-	self initializeBackSide.
-	self initializeFlippedSide.
+	self drawCardElement.
 	self layout: BlFrameLayout new.
 ```
 
@@ -344,7 +356,7 @@ MgdRawCardElement >> initializeFlippedSide
 	elt constraintsDo: [ :c |
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
-	self flippedSide: elt
+	^ elt
 ``
 
 
@@ -401,6 +413,7 @@ Here we define the layout to be a grid layout and we set it as horizontal.
 ```
 MgdGameElement >> initialize
 	super initialize.
+ 	self background: Color veryLightGray.
 	self layout: BlGridLayout horizontal.
 ```
 
@@ -417,15 +430,14 @@ Note in particular that we add all the card graphical elements as children of th
 ```
 MgdGameElement >> memoryGame: aGameModel
 	memoryGame := aGameModel.
-	
 	memoryGame availableCards
-		do: [ :aCard | self addChild: (self newCardElement card: aCard) ]
+		do: [ :aCard | self addChild: (MgdRawCardElement card: aCard) ]
 ```
 
 
 ```
-MgdGameElement >> newCardElement
-	^ MgdRawCardElement new
+MgdRawCardElement class >> card: aCard 
+	^ self new card: aCard
 ```
 
 
@@ -504,5 +516,34 @@ MgdGameElement >> initialize
 
 Once this method is changed, you should get a situation similar to the one described by Figure *@figBoardFullSpace@*.
 ![Displaying a full board with space.](figures/BoardFullSpace.png width=60&label=figBoardFullSpace)
+
+Before adding interaction let's define a method `openWith:` that will open our game element with a given model.
+
+```
+MgdGameElement class >> openWith: aMgdGameModel
+
+	| space gameElement |
+	space := BlSpace new.
+	gameElement := self new memoryGame: aMgdGameModel.
+	space root addChild: gameElement.
+ 
+	space show
+```
+
+If we try to open this, we clearly see our game element with all its cards but there's still some blank space around it, we can deal with this by changing the size of the space we put our game element into.
+
+```
+MgdGameElement class >> openWith: aMgdGameModel
+
+	| space gameElement |
+	space := BlSpace new.
+	gameElement := self new memoryGame: aMgdGameModel.
+	space root addChild: gameElement.
+ 	space pulse.
+  	space extent: gameElement extent.
+   
+	space show
+```
+Notice we send `pulse` to our space before changing its extent, it is required to tell the space to be prepared to change.
 
 We are now ready for adding interaction to the game. 
