@@ -357,7 +357,7 @@ MgdRawCardElement >> initializeFlippedSide
 		c frame horizontal alignCenter.
 		c frame vertical alignCenter ].
 	^ elt
-``
+```
 
 
 With this definition, we get a centered letter as shown in Figure *@figCardCentered@*.
