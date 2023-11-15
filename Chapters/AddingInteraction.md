@@ -8,147 +8,88 @@ and on the other hand, the communication between the model and view is managed v
 sent by the model.
 
 
-### An event listener
+### Adding events and event listeners
 
+In Bloc, there is of course plenty of Events and we will focus on `BlClickEvent`. We can also say that events are easily managed through event handlers 
 
-```
-BlElementEventListener << #MgdCardEventListener
-	slots: { #memoryGame };
-	package: 'Bloc-MemoryGame-Demo-Elements'
-```
-
-
-We add an instance variable `memoryGame` holding a game model to the listener because 
-we will need to access the model to react to events for example to update the game situation. 
-
-```
-MgdCardEventListener >> memoryGame: aGameModel
-	memoryGame := aGameModel
-```
-
-
-Let us redefine the `clickEvent:` method to raise a debugger. It will give us the occasion to introspect the system.
-
-```
-MgdCardEventListener >> clickEvent: anEvent
-	self halt
-```
-
-
-
-
-
-### Adding event listeners
-
-
-Now we should add the card event listener to each card because we want to know which card will be clicked and pass this 
+Now we should add an event handler to each card because we want to know which card will be clicked and pass this 
 information to the game model.
 
 
 ```
-MgdGameElement >> newCardEventListener
-	^ MgdCardEventListener new
+MgdGameElement >> initialize
+
+	super initialize.
+	self size: 80 @ 80.
+	self background: self backgroundPaint.
+	self geometry:
+		(BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
+	self drawBackSide.
+	self layout: BlFrameLayout new.
+	self addEventHandlerOn: BlClickEvent do: [ :anEvent | self click ]
 ```
 
-
-For that we have to extend `#memoryGame:` model setter in `MgdGameElement` as follows by adding a card event listener to every card element using `#addEventHandler:`: 
-
-```
-MgdGameElement >> memoryGame: aMgdGameModel
-	| aCardEventListener |
-	
-	memoryGame := aMgdGameModel.
-	aCardEventListener := self newCardEventListener memoryGame: aMgdGameModel.
-	
-	self layout columnCount: memoryGame gridSize.
-	
-	memoryGame availableCards
-		do: [ :aCard | 
-			| cardElement |
-			cardElement := self newCardElement card: aCard.
-			cardElement addEventHandler: aCardEventListener.
-			self addChild: cardElement ]
-```
+We can easily see that whenever our card Element will receive a click Event, we will send the `click` message to this element
 
 
-Please note, that in our case we can reuse the same event handler for all card elements. It allows us to reduce overall memory consumption and improve game initialization time.
+Please note, that if we created an instance of BlEventListener and added it as an event handler, we can reuse the same event handler for all card elements. It allows us to reduce overall memory consumption and improve game initialization time.
 
 ![Debugging the clickEvent: anEvent method.](figures/ClickWithDebugger.png width=100&label=figBoardFull)
 
 
 Now the preview is not enough and we should create a window and embed the game element. 
 Then when you click on a card you should get a debugger as shown in Figure *@figBoardFull@*.
-```
-space := BlSpace new.
-space extent: 420@420.  
-game := MgdGameModel numbers.
-grid := MgdGameElement new.
-grid memoryGame: game. 
-space root addChild: grid.
-space show 
-```
 
+### Specialize click
 
-
-### Specialize clickEvent:
-
-Now we can specialize the `clickEvent:` method as follows: 
-- We get the graphical element that receives the mouse click using the message `currentTarget`. The message `currentTarget` returns the element that receives an event.
-- From this graphical card we access the card model and we pass this card model to the game model. 
+Now we can specialize the `click` method as follows: 
+- We tell the model we just chose this card
+- We draw our cardElement according to its card state 
 
 
 ```
-MgdCardEventListener >> clickEvent: anEvent
-	memoryGame chooseCard: anEvent currentTarget card
+MgdRawCardElement >> click
+
+	self parent memoryGame chooseCard: self card.
+	self drawCardElement
 ```
 
 
-It means that the memory game model is changed but we do not see the visual effect of our actions. Indeed this is normal. We never made sure that visual elements were listening to model changes.  This is what we will do in the following chapter. 
+It means that the memory game model is changed but we cards don't flip back after mistaking the symbols. Indeed this is normal. We never made sure that visual elements were listening to model changes except for when we click on it.  This is what we will do in the following chapter. 
 
 
 
 ### Connecting the model to the UI
 
 Now we show how the domain communicates with the user interface: the domain emits notifications
-using announcements but it does not refer to the UI elements. It is the visual elements that should register to the notifications and react accordingly.
-
-
-Let us first define two simple methods in the class `MgdRawCardElement` just producing a trace.
-```
-MgdRawCardElement >> onDisappear
-	Transcript show: 'On disappear'; cr
-```
-
+using announcements but it does not refer to the UI elements. It is the visual elements that should register to the notifications and react accordingly. We can prepare the message that will tell our elements to disappear we both cards match, otherwise we just tell our cards to flip back and draw their backside
 
 ```
-MgdRawCardElement >> onFlipped
-	Transcript show: 'On flipped'; cr
+MgdRawCardElement >> disappear
+	"nothing for now"
 ```
-
 
 Now we can modify the setter so that when a card model is set to a card graphical element, we register to the notifications emitted by the model. 
-In the following method, we make sure that on notifications we invoke the trace methods just defined. 
+In the following methods, we make sure that on notifications we invoke the method just defined. 
 
 ```
-MgdRawCardElement >> card: aMgCard
-	card := aMgCard.
-	card announcer when: MgdCardFlippedAnnouncement send: #onFlipped to: self.
-	card announcer when: MgdCardDisappearAnnouncement send: #onDisappear to: self
+MgdRawCardElement >> initializeAnnouncements
+
+	card announcer
+		when: MgdCardDisappearAnnouncement
+		send: #disappear
+		to: self.
+	card announcer
+		when: MgdCardFlipBackAnnouncement
+		send: #drawBackSide
+		to: self
 ```
-
-
-![Tracing registration to the domain notifications.](figures/EventTraced.png width=100&label=figBoardEventTraced)
-
-Now when you click on a card, you can see the trace in the Transcript but you do not see the changes. This is because we should notify 
-the graphics engine that one element should be redrawn. 
-
-
 ```
-MgdRawCardElement >> onFlipped
-	Transcript show: 'On flipped'; cr.
-	self invalidate
-```
+MgdRawCardElement >> card: aMgdCard
 
+	card := aMgdCard.
+	self initializeAnnouncements
+```
 
 ### Handling disappear
 
@@ -158,17 +99,14 @@ Either setting the opacity of the element to 0
 (Note that the element is still present and receives events.)
 
 ```
-MgdRawCardElement >> onDisappear
-	Transcript show: 'On disappear'; cr.
+MgdRawCardElement >> disappear
 	self opacity: 0
 ```
-
 
 Or changing the visibility as follows:
 
 ```
-MgdRawCardElement >> onDisappear
-	Transcript show: 'On disappear'; cr.
+MgdRawCardElement >> disappear
 	self visibility: BlVisibility hidden
 ```
 
@@ -187,7 +125,7 @@ Remember, a card will raise a notification when flipped in either direction.
 
 ```
 MgdCardModel >> flip
-	flipped := aBoolean.
+	flipped := flipped not.
 	self notifyFlipped
 ```
 

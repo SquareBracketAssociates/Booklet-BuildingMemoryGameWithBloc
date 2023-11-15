@@ -44,6 +44,7 @@ We initialize it to get a
 MgdRawCardElement >> initialize
 	super initialize.
 	self size: 80 @ 80.
+	self background: self backgroundPaint.
 	self card: (MgdCardModel new symbol: $a)
 ```
 
@@ -51,20 +52,8 @@ MgdRawCardElement >> initialize
 ### Starting to draw a card
 
 
-To define the visual properties of a graphic element we redefine the method `drawOnSpartaCanvas:`.
+In Bloc, BlElements draw themselves onto the integrated canva of the inspector as we inspect them, take a look at our element by executing this:
 
-```
-MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
-	aCanvas fill 
-		paint: self backgroundPaint;
-		path: self boundsInLocal;
-		draw
-```
-
-
-Note, that if we forget to send the message `draw` the canvas will be set but it will not display the result. 
-
-Now to see the result in Morphic we can inspect our card element in Playground \(`CMD+g`\) and switch to `Live` presentation as shown in Figure *@figInspecting0@*:
 ```
 MgdRawCardElement new
 ```
@@ -76,16 +65,18 @@ MgdRawCardElement new
 
 
 Instead of displaying a full rectangle, we want a better visual. 
-`Sparta` canvas offers a shape factory. This shape factory returns shape path \(lines, rectangle, ellipse, circle...\) that can be passed to the canvas using the message `path:`. Other shapes can be easily added. 
+Bloc let us decide the geometry we want to give to our elements, it could be a circle, a triangle or a rounded rectangle for example, you can check avaible geometries by looking at subclasses of `BlElementGeometry`.
 
-For example with the following expression `path: (aCanvas shape ellipse: self boundsInLocal)` we now draw a circle since the bounds of the receiver returns a square of 80. The result is shown in Figure *@figCardCircle@*:
+We can start giving a circle shape to our element, we will need to use the `geometry:` message and give a `BlCircleGeometry` as a parameter.
 
 ```
-MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
-	aCanvas fill 
-		paint: self backgroundPaint;
-		path: (aCanvas shape ellipse: self boundsInLocal);
-		draw
+MgdRawCardElement >> initialize
+
+	super initialize.
+	self size: 80 @ 80.
+	self background: self backgroundPaint.
+	self geometry: BlCircleGeometry new.
+	self card: (MgdCardModel new symbol: $a)
 ```
 
 
@@ -93,29 +84,23 @@ MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
 
 However, we don't want the card to be a circle either. Ideally, it should be a rounded rectangle. So let's first add a helper method that would provide us with a corner radius:
 
+
 ```
 MgdRawCardElement >> cornerRadius
-	^ 12
+	^ 10
 ```
 
 
-We would like to have a rounded rectangle so we use the `roundedRectangle:radii:` factory message. However, this time, instead of just directly drawing a rounded rectangle we will fill the whole card as we did on the first step with `background paint` and then simply `clip` everything by rounding a rectangle:
+We would like to have a rounded rectangle so we use the `BlRoundedRectangleGeometry` class. However, we need to give the corner radius we just defined as a parameter of the `cornerRadius:` class message :
 
 ```
-MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
-	| roundedRectangle |
-	
-	roundedRectangle := aCanvas shape 
-		roundedRectangle: self boundsInLocal 
-		radii: (BlCornerRadii radius: self cornerRadius).
+MgdRawCardElement >> initialize
 
-	aCanvas clip
-		by: roundedRectangle
-		during: [
-			aCanvas fill
-				paint: self backgroundPaint;
-				path: self boundsInLocal;
-				draw. ]
+	super initialize.
+	self size: 80 @ 80.
+	self background: self backgroundPaint.
+	self geometry: (BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
+	self card: (MgdCardModel new symbol: $a)
 ```
 
 
@@ -132,68 +117,25 @@ You should get then a visual representation close to the one shown in Figure *@f
 We define now two methods 
 
 ```
-MgdRawCardElement >> drawBacksideOn: aCanvas
+MgdRawCardElement >> drawBackside
 	"nothing for now"
 ```
 
 
 ```
-MgdRawCardElement >> drawFlippedSideOn: aCanvas
+MgdRawCardElement >> drawFlippedSide
 	"nothing for now"
 ```
 
 
-And we refactor `drawOnSpartaCanvas:` as follows: 
+We can now define the method that will draw our card 
 
 ```
-MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
-	| roundedRectangle |
-	
-	roundedRectangle := aCanvas shape 
-		roundedRectangle: self boundsInLocal 
-		radii: (BlCornerRadii radius: self cornerRadius).
+MgdRawCardElement >> drawCardElement
 
-	aCanvas clip
-		by: roundedRectangle
-		during: [
-			aCanvas fill
-				paint: self backgroundPaint;
-				path: self boundsInLocal;
-				draw.
-				
-			self card isFlipped
-				ifTrue: [ self drawFlippedSideOn: aCanvas ]
-				ifFalse: [ self drawBacksideOn: aCanvas ] ]
-```
-
-
-we extract the common part into a separate method. 
-```
-MgdRawCardElement >> drawCommonOn: aCanvas
-	aCanvas fill
-		paint: self backgroundPaint;
-		path: self boundsInLocal;
-		draw
-```
-
-
-Finally, `drawOnSpartaCanvas:` logic is at the same conceptual level. 
-
-```
-MgdRawCardElement >> drawOnSpartaCanvas: aCanvas
-	| roundedRectangle |
-	
-	roundedRectangle := aCanvas shape 
-		roundedRectangle: self boundsInLocal 
-		radii: (BlCornerRadii radius: self cornerRadius).
-
-	aCanvas clip
-		by: roundedRectangle
-		during: [
-			self drawCommonOn: aCanvas.
-			self card isFlipped
-				ifTrue: [ self drawFlippedSideOn: aCanvas ]
-				ifFalse: [ self drawBacksideOn: aCanvas ] ]
+	self card isFlipped
+		  ifTrue: [ self drawFlippedSide ]
+		  ifFalse: [ self drawBackSide ]
 ```
 
 
@@ -202,41 +144,119 @@ Now we are ready to implement the backside and flipped side
 ### Adding a cross
 
 
-Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should provide it as a path. In Bloc, this can be done by either passing a Path object or by asking the canvas for its shape factory. 
-The shape factory encapsulates the logic of shapes. This is what we do below with the expression `path: (aCanvas shape line: 0 @ 0 to: self extent)`. The message `shape` returns a ShapeFactory and we ask this factory to produce a line path. 
+Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should use the `BlLineGeometry`. At the end, we will create two lines and therefore two elements with a line geometry that will be added as children of the card Element.
+
+> Bloc uses parent-child relations between its elements thus leaving us with trees of elements where each node is an element, connected to a single parent and with zero to many children
+
+A line is obviously defined between two points, we then need to give two points as parameters of the `from:to:` message from the `BlLineGeometry` class. 
+Lines created using BlLineGeometry are a bit special as considered as "open geometries" meaning we don't define their color with the usual `background:` message like any other `BlElement`. Instead we define a border for our line and give this border the color we wanted (here we chose light green), we also define the thickness of our line with the border's width.
+Another particularity of open geometries is that they don't fit well with default outskirts in the current verision of Bloc, this is why we redefine them to be centered 
 
 ```
-MgdRawCardElement >> drawBacksideOn: aCanvas
-	aCanvas stroke
-		paint: Color paleBlue;
-		path: (aCanvas shape line: 0@0 to: self extent);
-		draw.
+MgdRawCardElement >> initializeFirstLine
+
+	| line |
+	line := BlElement new
+		        border: (BlBorder paint: Color lightGreen width: 3);
+			geometry: BlLineGeometry new;
+		        outskirts: BlOutskirts centered.
+	line
+		when: BlElementLayoutComputedEvent
+		do: [ :e | line geometry from: 0 @ 0 to: line parent extent ].
+	^ line
+```
+The message `when:do:` is used here to wait for the line parent to be drawn for the line to be defined, otherwise the `line parent extent` will be 0@0 and our line will not be displayed. 
+
+We can redefine `drawBackSide` and add the line we just created.
+
+```
+MgdRawCardElement >> drawBackSide
+
+	self addChild: self initializeFirstLine.
+	^ self
 ```
 
+Once this method is defined, refresh the inspector and you should get a card as in Figure *@figOneLine@*.
 
-
-Once this method is defined, refresh the inspector and you should get a card as in Figure *@figOneLIne@*.
-
-![A rounded card with half of the cross.](figures/CardOneLine.png width=60&label=figOneLIne)
+![A rounded card with half of the cross.](figures/CardOneLine.png width=60&label=figOneLine)
 
 ### Full cross
 
 
-Now we can add the second line to build a full cross. Our solution is defined as follows: 
+Now we can add the second line to build a full cross. We will add another instance variable holding our back side so that the lines are created only once during initialization. Our solution is defined as follows: 
 
 ```
-MgdRawCardElement >> drawBacksideOn: aCanvas
-	aCanvas stroke
-		paint: Color paleBlue;
-		path: (aCanvas shape line: 0@0 to: self extent);
-		draw.
-
-	aCanvas stroke
-		paint: Color paleBlue;
-		path: (aCanvas shape line: self width @ 0 to: 0@self height);
-		draw
+BlElement << #MgdRawCardElement
+	slots: { #card #backSide };
+	package: 'Bloc-MemoryGame-Demo-Elements'
+```
+```
+MgdRawCardElement >> backSide: aBlElement
+	backside := aBlElement
 ```
 
+Before creating the getter of backside, we will create the method that will be responsible for adding the two lines together as a cross `initializeBackSide`. Let's start by creating the second line the same way we created the first one.
+
+
+```
+MgdRawCardElement >> initializeSecondLine
+
+	| line |
+	line := BlElement new
+		        border: (BlBorder paint: Color lightGreen width: 3);
+			geometry: BlLineGeometry new;
+		        outskirts: BlOutskirts centered.
+	line when: BlElementLayoutComputedEvent do: [ :e |
+		line geometry from: 0 @ line parent height to: line parent width @ 0 ].
+	^ line
+```
+```
+MgdRawCardElement >> initializeBackSide
+
+	| firstLine secondLine cross |
+	firstLine := self initializeFirstLine.
+	secondLine := self initializeSecondLine.
+
+	cross := BlElement new
+		         addChildren: {
+				         firstLine.
+				         secondLine };
+		         constraintsDo: [ :c |
+			         c horizontal matchParent.
+			         c vertical matchParent ].
+
+	^ cross
+```
+
+Our backside is then an Element holding both lines, we tell this element to match its parent using constraints, meaning the element size will scale according to the parent size, this also makes our lines defined to the correct points. 
+
+We can now define the backSide getter but with a little twist, using lazy initialization. This will create our element only when accessed the first time and not right after the initialization of the card element. This concept is very useful in certain situations and is great to know in case you need it, we define it as such :
+
+
+```
+MgdRawCardElement >> backSide
+	^ backSide ifNil: [ self initializeBackSide ]
+```
+
+We can finally redefine `drawBackSide` and call it in our initialization to draw our backside when the card is created. 
+
+```
+MgdRawCardElement >> drawBackSide
+	self removeChildren.
+	self addChild: self backSide
+```
+
+```
+MgdRawCardElement >> initialize
+
+	super initialize.
+	self size: 80 @ 80.
+	self background: self backgroundPaint.
+	self geometry:
+		(BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
+	self card: (MgdCardModel new symbol: $a).
+	self drawCardElement.
+```
 
 
 ![A card with a complete backside.](figures/CardCross.png width=60&label=figCardCross)
@@ -263,112 +283,86 @@ Now we are ready to implement the flipped side.
 
 ![A flipped card without any visuals.](figures/CardForFlip.png width=60&label=figCardForFlip)
 
-Let us redefine `drawFlippedSideOn:` as follows: 
-- First, we ask the canvas to build a font of size 50. Note that for the font we specify a FreeType font (pay attention that strike fonts do not work and will never work in Bloc - in fact they will be removed once Pharo is based on Bloc).
-- Then we ask the canvas to draw a text using the font with the color we want. 
+Let us redefine `drawFlippedSide` as follows: 
+- First, we create a text element that holds the symbol of the card, we also give properties to this text by changing the font of the text but also its size and its color.
+- Then we add the text element as a child of our card element
 
-We should not forget to send the message `draw` to the canvas. 
-
-```
-MgdRawCardElement >> drawFlippedSideOn: aCanvas
-	| font |
-	font := aCanvas font
-		named: 'Source Sans Pro';
-		size: 50;
-		build.
-	aCanvas text
-		font: font;
-		paint: Color white;
-		string: self card symbol asString;
-		draw
-```
-
-
-When we refresh the display we do not see the symbol and this is a problem. 
-If you pay attention you will see that there is just one line that is drawn on the top left of the card. 
-You can change the color to red to see it on the card. 
-We are drawing the string in the corner and outside the rounded rectangle. 
-Let us fix that issue by defining the baseline from which the text should be displayed.
+We will add an instance variable 'flippedSide' to our `MgdRawCardElement` class so that we create the text only once during the initialization. We don't forget about getter and setter.
 
 ```
-MgdRawCardElement >> drawFlippedSideOn: aCanvas
-	| font origin |
-	font := aCanvas font
-		named: 'Source Sans Pro';
-		size: 50;
-		build.
-	origin := self extent / 2.0.
-	aCanvas text
-		baseline: origin;
-		font: font;
-		paint: Color white;
-		string: self card symbol asString;
-		draw
+BlElement << #MgdRawCardElement
+	slots: { #card #backSide #flippedSide };
+	package: 'Bloc-MemoryGame-Demo-Elements'
+```
+```
+MgdRawCardElement >> flippedSide
+
+	^ flippedSide ifNil: [ self initializeFlippedSide ]
+```
+
+We can now create the method that will create the text for the flipped side, this method will be called during initialization.
+
+```
+MgdRawCardElement >> initializeFlippedSide
+
+	| elt |
+	elt := BlTextElement new text: self card symbol asRopedText.
+	elt text fontName: 'Source Sans Pro'.
+	elt text fontSize: 50.
+	elt text foreground: Color white.
+	^ elt
+```
+
+Now we can redefine `drawFlippedSide` to add our text element as a child of our card element
+
+```
+MgdRawCardElement >> drawFlippedSide
+
+	self removeChildren.
+	self addChild: self flippedSide
 ```
 
 
-When you refresh the inspector you should see the card symbol but not centered as shown in Figure *@figCardNotCentered@*.
-
+When we refresh the display we can see the letter 'a' appear but it is positioned in the top left corner of our element, just as shown in Figure *@figCardNotCentered@*
 
 ![Not centered letter.](figures/CardNotCentered.png width=60&label=figCardNotCentered)
 
-To center the text well, we have to use exact font metrics. Bloc can support multiple graphical back-ends such as Cairo and in the future plain OpenGL. There is one important constraint, which is that font metrics should be measured and manipulated via the same back-end abstraction. 
-For this purpose, the expression `aCanvas text` returns a text painter and such a text painter provides access to the font measurements.  Using such measurements we can then get access to the text metrics and compute a better center.
+Let's change that !
+We will have to use constraints on our text element to tell him to get aligned in the center of its parent. To achieve this goal, we need to define a layout on the parent which is our card Element. We will use a Frame Layout that acts just like a real frame, meaning the text element will be able to get centered into the frame of its parent. Let's add the frame layout in the initialization of the card Element.
 
 ```
-MgdRawCardElement >> drawFlippedSideOn: aCanvas
-	| font origin textPainter metrics |
-	font := aCanvas font
-		named: 'Source Sans Pro';
-		size: 50;
-		build.
+MgdRawCardElement >> initialize
 
-	textPainter := aCanvas text
-		font: font;
-		paint: Color white;
-		string: self card symbol asString.
-	
-	metrics := textPainter measure. 
-	
-	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
-	textPainter 
-		baseline: origin;
-		draw
+	super initialize.
+	self size: 80 @ 80.
+	self background: self backgroundPaint.
+	self geometry:
+		(BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
+	self card: (MgdCardModel new symbol: $a).
+	self drawCardElement.
+	self layout: BlFrameLayout new.
 ```
 
-
-With this definition we get the letter centered horizontally but not vertically as shown in Figure *@figCardCenteredHorizontally@*. This is because 
-we have to take into account the font size.
-
-![Horizontally centered letter.](figures/CardCenteredHorizontally.png width=60&label=figCardCenteredHorizontally)
+We can now add the constraints to the text element.
 
 ```
-MgdRawCardElement >> drawFlippedSideOn: aCanvas
-	| font origin textPainter metrics |
-	font := aCanvas font
-		named: 'Source Sans Pro';
-		size: 50;
-		build.
+MgdRawCardElement >> initializeFlippedSide
 
-	textPainter := aCanvas text
-		font: font;
-		paint: Color white;
-		string: self card symbol asString.
-
-	metrics := textPainter measure. 
-
-	origin := (self extent - metrics textMetrics bounds extent) / 2.0.
-	origin := origin - metrics textMetrics bounds origin.
-	textPainter 
-		baseline: origin;
-		draw
+	| elt |
+	elt := BlTextElement new text: self card symbol asRopedText.
+	elt text fontName: 'Source Sans Pro'.
+	elt text fontSize: 50.
+	elt text foreground: Color white.
+	elt constraintsDo: [ :c |
+		c frame horizontal alignCenter.
+		c frame vertical alignCenter ].
+	^ elt
 ```
 
 
 With this definition, we get a centered letter as shown in Figure *@figCardCentered@*.
 
 ![Centered letter.](figures/CardCentered.png width=60&label=figCardCentered)
-
 
 Now we are ready to work on the board game.
 
@@ -419,6 +413,7 @@ Here we define the layout to be a grid layout and we set it as horizontal.
 ```
 MgdGameElement >> initialize
 	super initialize.
+ 	self background: Color veryLightGray.
 	self layout: BlGridLayout horizontal.
 ```
 
@@ -435,15 +430,14 @@ Note in particular that we add all the card graphical elements as children of th
 ```
 MgdGameElement >> memoryGame: aGameModel
 	memoryGame := aGameModel.
-	
 	memoryGame availableCards
-		do: [ :aCard | self addChild: (self newCardElement card: aCard) ]
+		do: [ :aCard | self addChild: (MgdRawCardElement card: aCard) ]
 ```
 
 
 ```
-MgdGameElement >> newCardElement
-	^ MgdRawCardElement new
+MgdRawCardElement class >> card: aCard 
+	^ self new card: aCard
 ```
 
 
@@ -522,5 +516,34 @@ MgdGameElement >> initialize
 
 Once this method is changed, you should get a situation similar to the one described by Figure *@figBoardFullSpace@*.
 ![Displaying a full board with space.](figures/BoardFullSpace.png width=60&label=figBoardFullSpace)
+
+Before adding interaction let's define a method `openWith:` that will open our game element with a given model.
+
+```
+MgdGameElement class >> openWith: aMgdGameModel
+
+	| space gameElement |
+	space := BlSpace new.
+	gameElement := self new memoryGame: aMgdGameModel.
+	space root addChild: gameElement.
+ 
+	space show
+```
+
+If we try to open this, we clearly see our game element with all its cards but there's still some blank space around it, we can deal with this by changing the size of the space we put our game element into.
+
+```
+MgdGameElement class >> openWith: aMgdGameModel
+
+	| space gameElement |
+	space := BlSpace new.
+	gameElement := self new memoryGame: aMgdGameModel.
+	space root addChild: gameElement.
+ 	space pulse.
+  	space extent: gameElement extent.
+   
+	space show
+```
+Notice we send `pulse` to our space before changing its extent, it is required to tell the space to be prepared to change.
 
 We are now ready for adding interaction to the game. 
