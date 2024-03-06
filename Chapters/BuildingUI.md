@@ -11,7 +11,7 @@ Our graphic element representing a card will be a subclass of the `BlElement` wh
 ```
 BlElement << #MgdRawCardElement
 	slots: { #card };
-	package: 'Bloc-MemoryGame-Demo-Elements'
+	package: 'Bloc-MemoryGame'
 ```
 
 
@@ -32,14 +32,14 @@ MgdRawCardElement >> card
 ```
 
 
-
 ```
 MgdRawCardElement >> card: aMgCard
 	card := aMgCard
 ```
 
 
-We initialize it to get a
+We define a method `initialize` to set the size and the default color as well as a card model object.
+
 ```
 MgdRawCardElement >> initialize
 	super initialize.
@@ -52,7 +52,7 @@ MgdRawCardElement >> initialize
 ### Starting to draw a card
 
 
-In Bloc, BlElements draw themselves onto the integrated canva of the inspector as we inspect them, take a look at our element by executing this:
+In Bloc, BlElements draw themselves onto the integrated canvas of the inspector as we inspect them, take a look at our element by executing this:
 
 ```
 MgdRawCardElement new
@@ -188,7 +188,7 @@ Now we can add the second line to build a full cross. We will add another instan
 ```
 BlElement << #MgdRawCardElement
 	slots: { #card #backSide };
-	package: 'Bloc-MemoryGame-Demo-Elements'
+	package: 'Bloc-MemoryGame'
 ```
 ```
 MgdRawCardElement >> backSide: aBlElement
@@ -292,7 +292,7 @@ We will add an instance variable 'flippedSide' to our `MgdRawCardElement` class 
 ```
 BlElement << #MgdRawCardElement
 	slots: { #card #backSide #flippedSide };
-	package: 'Bloc-MemoryGame-Demo-Elements'
+	package: 'Bloc-MemoryGame'
 ```
 ```
 MgdRawCardElement >> flippedSide
@@ -389,7 +389,7 @@ This view object holds a reference to the game model.
 ```
 BlElement << #MgdGameElement
 	slots: { #memoryGame };
-	package: 'Bloc-MemoryGame-Demo-Elements'
+	package: 'Bloc-MemoryGame'
 ```
 
 
@@ -500,7 +500,7 @@ We achieve this by using the message `cellSpacing:` as shown below.
 
 We take the opportunity to change the background color using the message `background:`.
 Note that a background is not necessarily a color but that color is polymorphic to a background
-therefore the expression `background: Color gray darker` is equivalent to `background: (BlBackground paint: Color gray darker)`.
+, therefore, the expression `background: Color gray darker` is equivalent to `background: (BlBackground paint: Color gray darker)`.
 
 ```
 MgdGameElement >> initialize
@@ -530,7 +530,7 @@ MgdGameElement class >> openWith: aMgdGameModel
 	space show
 ```
 
-If we try to open this, we clearly see our game element with all its cards but there's still some blank space around it, we can deal with this by changing the size of the space we put our game element into.
+If we try to open this, we see our game element with all its cards but there's still some blank space around it, we can deal with this by changing the size of the space we put our game element into.
 
 ```
 MgdGameElement class >> openWith: aMgdGameModel
@@ -546,4 +546,4 @@ MgdGameElement class >> openWith: aMgdGameModel
 ```
 Notice we send `pulse` to our space before changing its extent, it is required to tell the space to be prepared to change.
 
-We are now ready for adding interaction to the game. 
+We are now ready to add interaction to the game. 
