@@ -1,14 +1,10 @@
 ## Objectives of this book
 
-
-Now that Bloc's design is stabilizing, this book presents its first tutorial.
-Future changes should mostly be minor \(e.g. method renaming\).
+Bloc is the new graphics library for Pharo. A graphics library implies several aspects such as coordinate systems, drawing shape, clipping, and event management. 
 
 In this tutorial, you will build a memory game. Given a provided model of a game, we will focus on creating a UI for it.
 
-
 ### Memory game
-
 
 Let us have a look at what we want to build with you: a simple Memory game. 
 In a memory game, players need to find pairs of similar cards. In each round, 
@@ -16,7 +12,8 @@ a player turns over two cards at a time. If the two cards show the same symbol
 they are removed and the player gets a point. If not, they are both returned facedown. 
 
 For example, Figure *@figmemoryExample0@* shows the game after the first selection 
-of two cards. Facedown cards are represented with a cross and turned cards show their number. Figure *@figmemoryExample1@* shows the same game after a few 
+of two cards. Facedown cards are represented with a cross and turned cards show their number. 
+Figure *@figmemoryExample1@* shows the same game after a few 
 rounds. While this game can be played by multiple players, in this tutorial we will 
 build a game with just one player. 
 
@@ -39,7 +36,7 @@ space show
 - First, we create a game model and ask you to associate the numbers from 1 to 8 with the cards. By default, a game model has a size of 4 by 4, which fits eight pairs of numbered cards.
 - Second, we create a graphical game element.
 - Third, we assign the model of the game to the UI. 
-- Finally, we create and display a graphical space in which we place the game UI. 
+- Finally, we create and display a graphical space in which we place the game UI. Note that this last sequence can be packaged as message to the `MgdGameElement`.
 
  
  
@@ -53,19 +50,11 @@ This tutorial is for Pharo 11.0 \(`https://pharo.org/download`\) running on the 
 To load Bloc, execute the following snippet in a Pharo Playground:
 
 ```
-[ Metacello new
-	baseline: 'Bloc';
-	repository: 'github://pharo-graphics/Bloc:dev-1.0/src';
-	onConflictUseIncoming;
-	ignoreImage;
-	load ]
-		on: MCMergeOrLoadWarning
-		do: [ :warning | warning load ]
+[ Metacello new	baseline: 'Bloc';	repository: 'github://pharo-graphics/Bloc:master/src';	onConflictUseIncoming;	ignoreImage;	load ]		on: MCMergeOrLoadWarning		do: [ :warning | warning load ]
 ```
 
 
 ### Loading the Memory Game
-
 
 To make the demo easier to follow and help you if you get lost, we already made a full implementation of the game. You can load it using the following code:
 
@@ -75,6 +64,8 @@ Metacello new
     repository: 'github://pharo-graphics/Tutorials/src';
     load
 ```
+
+SHOULD REVISIT THE LOAD!
 
 
 After you have loaded the BlocTutorials project, you will get two new packages: `Bloc-MemoryGame` and `Bloc-MemoryGame-Demo`. `Bloc-MemoryGame` contains the full implementation of the game. Just browse to the class side of `MgExamples` and click on the green triangle next to the `open` method to start the game. `Bloc-MemoryGame-Demo` contains a skeleton of the game that we will use in this tutorial.
@@ -89,7 +80,7 @@ all communication is done via announcements. On the other hand, the graphic elem
 communicating directly with the model.
 
 In the remainder of this chapter, we describe the game model in detail. If you want to move directly to
-building graphical elements using Bloc, you can find this model in the package `Bloc-MemoryGame-Demo`.
+building graphical elements using Bloc, you can find this model in the package `Bloc-MemoryGame`.
 
 
 ### Reviewing the card model
@@ -100,12 +91,13 @@ Let us start with the card model: a card is an object holding a symbol to be dis
 ```
 Object << #MgdCardModel
 	slots: { #symbol . #flipped . #announcer};
-	package: 'Bloc-MemoryGame-Demo-Model'
+	tag: 'Model';
+	package: 'Bloc-MemoryGame'
 ```
 
 
 
-After creating the class we add an `initialize` method to set the card as not flipped, together with several accessors:
+After creating the class we define an `initialize` method to set the card as not flipped, together with several accessors:
 
 ```
 MgdCardModel >> initialize
@@ -129,7 +121,7 @@ MgdCardModel >> isFlipped
 ```
 
 ```
-MgdCardModel >>	announcer
+MgdCardModel >> announcer
 	^ announcer ifNil: [ announcer := Announcer new ]
 ```
 
@@ -137,7 +129,7 @@ MgdCardModel >>	announcer
 ### Card simple operations
 
 
-Next we need two API methods to flip a card and make it disappear when it is no longer needed in the game.
+Next we need two methods to flip a card and make it disappear when it is no longer needed in the game.
 
 ```
 MgdCardModel >> flip
@@ -156,7 +148,7 @@ MgdCardModel >> disappear
 
 The notification is implemented as follows in the `notifyFlipped` and `notifyDisappear` methods. 
 They simply announce events of type `MgdCardFlippedAnnouncement` and `MgdCardDisappearAnnouncement`. 
-The graphical elements will have to register subscriptions to these announcements as we will see later.
+The graphical elements have to register subscriptions to these announcements as we will see later.
 
 ```
 MgdCardModel >> notifyFlipped
@@ -174,13 +166,13 @@ Here, `MgdCardFlippedAnnouncement` and `MgdCardDisappearAnnouncement` are subcla
 
 ```
 Announcement << #MgdCardFlippedAnnouncement
-	package: 'Bloc-MemoryGame-Demo-Events'
+	package: 'Bloc-MemoryGame'
 ```
 
 
 ```
 Announcement << #MgdCardDisappearAnnouncement
-	package: 'Bloc-MemoryGame-Demo-Events'
+	package: 'Bloc-MemoryGame'
 ```
 
 
@@ -198,7 +190,6 @@ MgdCardModel >> printOn: aStream
 
 
 ### Reviewing the game model
-
 
 The game model is simple: it keeps track of all the available cards and all the cards currently selected by the player. 
 
@@ -233,7 +224,7 @@ MgdGameModel >> chosenCards
 For now, we'll hardcode the size of the grid and the number of cards that need to be matched by a player.
 ```
 MgdGameModel >> gridSize
-	"Return grid size, total amount of cards is gridSize^2"
+	"Return grid size"
 	^ 4
 ```
 
@@ -259,25 +250,20 @@ We also add an assertion in this method to verify that the caller provided enoug
 
 ```
 MgdGameModel >> initializeForSymbols: characters
-
-	self
-		assert: [ characters size = (self cardsCount / self matchesCount) ]
-		description: [ 'Amount of characters must be equal to possible all combinations' ].
-	availableCards := (characters asArray collect: [ :aSymbol | 
-		(1 to: self matchesCount) collect: [ :i |
-			 MgdCardModel new symbol: aSymbol ] ]) 
-			    flattened shuffled asOrderedCollection
+	aCollectionOfCharacters size = (self cardsCount / self matchesCount)		ifFalse: [ self error: 'Amount of characters must be equal to possible all combinations' ].	aCollectionOfCharacters do: [ :aSymbol |		1 to: self matchesCount do: [ :i |		availableCards add: (MGCard new symbol: aSymbol) ] ].	availableCards := availableCards shuffled
 ```
 
 
 ### Game logic
 
-Next, we need `chooseCard:`, a method that will be called when a user selects a card. 
+Next, we define the method `chooseCard:`. It will be called when a user selects a card. 
 This method is actually the most complex method of the model and implements the main
-logic of the game. First, the method makes sure that the chosen card is not already selected.
+logic of the game. 
+
+- First, the method makes sure that the chosen card is not already selected.
 This could happen if the view uses animations that give the player the chance to click on a card more than once.
-Next, the card is flipped by sending it the message `flip`. 
-Finally, depending on the actual state of the game, the step is complete and the selected cards are either removed or flipped back.
+- Next, the card is flipped by sending it the message `flip`. 
+- Finally, depending on the actual state of the game, the step is complete and the selected cards are either removed or flipped back.
 
 ```
 MgdGameModel >> chooseCard: aCard
@@ -292,6 +278,7 @@ MgdGameModel >> chooseCard: aCard
 ```
 
 
+##### Completed. 
 The current step is completed if the player selects the right amount of cards and they all show the same symbol.
 In this case, all selected cards receive the message `disappear` and are removed from the list of selected cards.
 
@@ -317,6 +304,7 @@ MgdGameModel >> completeStep
 ```
 
 
+##### Reset.
 
 The current step should be reset if the player selects a third card. This will happen when a player already
 selected two cards that do not match and clicks on a third one. In this situation, the two initial cards will be
@@ -329,7 +317,7 @@ MgdGameModel >> shouldResetStep
 
 ```
 MgdGameModel >> resetStep
-	|lastCard|
+	| lastCard |
 	lastCard := self chosenCards  last.
 	self chosenCards 
 		allButLastDo: [ :aCard | aCard flip ];
