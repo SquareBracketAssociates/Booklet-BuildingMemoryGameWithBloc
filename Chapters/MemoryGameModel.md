@@ -81,12 +81,13 @@ You can browse a model of the game just executing the following code snippet:
 MGGame withEmoji 
 ```
 
-To get a 
+To get a working game just execute the following expression.
 
 ```
 MGGameElement openWithNumber
 ```
 
+Since we give you all the code, if you want to write it by your own just use a different prefix for the classes.
 
 ## Game model insights
 
@@ -105,7 +106,7 @@ building graphical elements using Bloc, this model is fully defined in the packa
 Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not, and an announcer that emits state changes. This object could also be a subclass of Model which already provides announcer management. 
 
 ```
-Object << #MGCardModel
+Object << #MGCard
 	slots: { #symbol . #flipped . #announcer};
 	tag: 'Model';
 	package: 'Bloc-Memory'
@@ -116,28 +117,28 @@ Object << #MGCardModel
 After creating the class we define an `initialize` method to set the card as not flipped, together with several accessors:
 
 ```
-MGCardModel >> initialize
+MGCard >> initialize
 	super initialize.
 	flipped := false
 ```
 
 ```
-MGCardModel >> symbol: aCharacter
+MGCard >> symbol: aCharacter
 	symbol := aCharacter
 ```
 
 ```
-MGCardModel >> symbol
+MGCard >> symbol
 	^ symbol
 ```
 
 ```
-MGCardModel >> isFlipped
+MGCard >> isFlipped
 	^ flipped
 ```
 
 ```
-MGCardModel >> announcer
+MGCard >> announcer
 	^ announcer ifNil: [ announcer := Announcer new ]
 ```
 
@@ -148,14 +149,14 @@ MGCardModel >> announcer
 Next we need two methods to flip a card and make it disappear when it is no longer needed in the game.
 
 ```
-MGCardModel >> flip
+MGCard >> flip
 	flipped := flipped not.
 	self notifyFlipped
 ```
 
 
 ```
-MGCardModel >> disappear
+MGCard >> disappear
 	self notifyDisappear
 ```
 
@@ -167,13 +168,13 @@ They simply announce events of type `MGCardFlippedAnnouncement` and `MGCardDisap
 The graphical elements have to register subscriptions to these announcements as we will see later.
 
 ```
-MGCardModel >> notifyFlipped
+MGCard >> notifyFlipped
 	self announcer announce: MGCardFlippedAnnouncement new
 ```
 
 
 ```
-MGCardModel >> notifyDisappear
+MGCard >> notifyDisappear
 	self announcer announce: MGCardDisappearAnnouncement new
 ```
 
@@ -195,7 +196,7 @@ Announcement << #MGCardDisappearAnnouncement
 We add one final method to print a card more nicely and we are done with the card model!
 
 ```
-MGCardModel >> printOn: aStream
+MGCard >> printOn: aStream
 	aStream
 		nextPutAll: 'Card';
 		nextPut: Character space;
@@ -210,7 +211,7 @@ MGCardModel >> printOn: aStream
 The game model is simple: it keeps track of all the available cards and all the cards currently selected by the player. 
 
 ```
-Object << #MGGameModel
+Object << #MGGame
 	slots: { #availableCards . #chosenCards};
 	package: 'Bloc-MemoryGame-Demo-Model'
 ```
@@ -219,21 +220,21 @@ Object << #MGGameModel
 The `initialize` method sets up two collections for the cards.
 
 ```
-MGGameModel >> initialize
+MGGame >> initialize
 	super initialize.
 	availableCards := OrderedCollection new.
 	chosenCards := OrderedCollection new
 ```
 
 ```
-MGGameModel >> availableCards
+MGGame >> availableCards
 	^ availableCards
 ```
 
 The `chosenCards` collection will hold at max two cards in this version of the game. 
 
 ```
-MGGameModel >> chosenCards
+MGGame >> chosenCards
 	^ chosenCards
 ```
 
@@ -244,7 +245,7 @@ For now, we'll hardcode the size of the grid and the number of cards that need t
 Later this could be turned into an instance variable and be configured.
 
 ```
-MGGameModel >> gridSize
+MGGame >> gridSize
 	"Return grid size"
 	^ 4
 ```
@@ -252,13 +253,13 @@ MGGameModel >> gridSize
 The method `matchesCount` indicates that two identical cards are needed to match. 
 
 ```
-MGGameModel >> matchesCount
+MGGame >> matchesCount
 	"How many chosen cards should match in order for them to disappear"
 	^ 2
 ```
 
 ```
-MGGameModel >> cardsCount
+MGGame >> cardsCount
 	"Return how many cards there should be depending on grid size"
 	^ self gridSize * self gridSize
 ```
@@ -272,7 +273,7 @@ This method creates a list of cards from a list of characters and shuffles it.
 We also add an assertion in this method to verify that the caller provided enough characters to fill up the game board.
 
 ```
-MGGameModel >> initializeForSymbols: characters
+MGGame >> initializeForSymbols: characters
 
 	aCollectionOfCharacters size = (self cardsCount / self matchesCount)
 		ifFalse: [ self error: 'Amount of characters must be equal to possible all combinations' ].
@@ -296,7 +297,7 @@ This could happen if the view uses animations that give the player the chance to
 - Finally, depending on the actual state of the game, the step is complete and the selected cards are either removed or flipped back.
 
 ```
-MGGameModel >> chooseCard: aCard
+MGGame >> chooseCard: aCard
 	(self chosenCards includes: aCard) 
 		ifTrue: [ ^ self ].
 	self chosenCards add: aCard.
@@ -313,13 +314,13 @@ The current step is completed if the player selects the right amount of cards an
 In this case, all selected cards receive the message `disappear` and are removed from the list of selected cards.
 
 ```
-MGGameModel >> shouldCompleteStep
+MGGame >> shouldCompleteStep
 	^ self chosenCards size = self matchesCount 
 		and: [ self chosenCardMatch ]
 ```
 
 ```
-MGGameModel >> chosenCardMatch
+MGGame >> chosenCardMatch
 	| firstCard |
 	firstCard := self chosenCards first.
 	^ self chosenCards allSatisfy: [ :aCard | 
@@ -328,7 +329,7 @@ MGGameModel >> chosenCardMatch
 Note that the logic of chosenCardMatch looks more complex than expected but it works with matches that require more than two cards. 
 
 ```
-MGGameModel >> completeStep
+MGGame >> completeStep
 	self chosenCards 
 		do: [ :aCard | aCard disappear ];
 		removeAll.
@@ -342,12 +343,12 @@ selected two cards that do not match and clicks on a third one. In this situatio
 flipped back. The list of selected cards will only contain the third card.
 
 ```
-MGGameModel >> shouldResetStep 
+MGGame >> shouldResetStep 
 	^ self chosenCards size > self matchesCount
 ```
 
 ```
-MGGameModel >> resetStep
+MGGame >> resetStep
 	| lastCard |
 	lastCard := self chosenCards  last.
 	self chosenCards 
