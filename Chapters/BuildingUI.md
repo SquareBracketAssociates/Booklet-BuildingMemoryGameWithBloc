@@ -1,8 +1,8 @@
 ## Building card graphical elements
 
 
-In this chapter we will build the visual appearance of the cards step by step.
-In Bloc, visual objects are called elements, which are usually subclasses of `BlElement`, the inheritance tree root. In subsequent chapters we will do the same for the game and add interaction using event listeners.
+In this chapter, we will build the visual appearance of the cards step by step.
+In Bloc, visual objects are called elements, which are usually subclasses of `BlElement`, the inheritance tree root. In subsequent chapters, we will do the same for the game and add interaction using event listeners.
 
 ### First: the card element
 
@@ -45,7 +45,7 @@ MgdRawCardElement >> initialize
 	super initialize.
 	self size: 80 @ 80.
 	self background: self backgroundPaint.
-	self card: (MgdCardModel new symbol: $a)
+	self card: (MGCard new symbol: $a)
 ```
 
 

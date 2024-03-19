@@ -19,16 +19,17 @@ build a game with just one player.
 
 ![The game after the player has selected two cards: facedown cards are represented with a cross and turned cards with their number.](figures/memoryExample0.png width=60&label=figmemoryExample0)
 
-Our goal is to have a functional game with a model and a simple graphical user interface. In the end, the following code should be able to build, initialize, and launch the game:
+Our goal is to have a working game with a model and a simple graphical user interface. 
+In the end, the following code should be able to build, initialize, and launch the game:
 
 ```
-game := MgdGameModel new initializeForSymbols: '12345678'.
-grid := MgdGameElement new.
-grid memoryGame: game.	
+game := MGGame withNumbers.
+visual := MGGameElement new.
+visual memoryGame: game.	
 
 space := BlSpace new. 
 space extent: 420@420.
-space root addChild: grid.
+space root addChild: visual.
 space show 
 ```
 
@@ -36,7 +37,7 @@ space show
 - First, we create a game model and ask you to associate the numbers from 1 to 8 with the cards. By default, a game model has a size of 4 by 4, which fits eight pairs of numbered cards.
 - Second, we create a graphical game element.
 - Third, we assign the model of the game to the UI. 
-- Finally, we create and display a graphical space in which we place the game UI. Note that this last sequence can be packaged as message to the `MgdGameElement`.
+- Finally, we create and display a graphical space in which we place the game UI. Note that this last sequence should be better packaged as a message to the `MGGameElement`.
 
  
  
@@ -50,7 +51,14 @@ This tutorial is for Pharo 11.0 \(`https://pharo.org/download`\) running on the 
 To load Bloc, execute the following snippet in a Pharo Playground:
 
 ```
-[ Metacello new	baseline: 'Bloc';	repository: 'github://pharo-graphics/Bloc:master/src';	onConflictUseIncoming;	ignoreImage;	load ]		on: MCMergeOrLoadWarning		do: [ :warning | warning load ]
+[ Metacello new
+	baseline: 'Bloc';
+	repository: 'github://pharo-graphics/Bloc:master/src';
+	onConflictUseIncoming;
+	ignoreImage;
+	load ]
+		on: MCMergeOrLoadWarning
+		do: [ :warning | warning load ]
 ```
 
 
@@ -60,15 +68,24 @@ To make the demo easier to follow and help you if you get lost, we already made 
 
 ```
 Metacello new
-    baseline: 'BlocTutorials';
-    repository: 'github://pharo-graphics/Tutorials/src';
+    baseline: 'BlocMemoryTutorial';
+    repository: 'github://pharo-graphics/Bloc-Memory-Tutorial/src';
     load
 ```
 
-SHOULD REVISIT THE LOAD!
+After you have loaded the MemoryTutorial project, you will get two new packages: `Bloc-Memory` and `Bloc-MemoryGame-Demo`. `Bloc-MemoryTests` contains the full implementation of the game. 
 
+You can browse a model of the game just executing the following code snippet:
 
-After you have loaded the BlocTutorials project, you will get two new packages: `Bloc-MemoryGame` and `Bloc-MemoryGame-Demo`. `Bloc-MemoryGame` contains the full implementation of the game. Just browse to the class side of `MgExamples` and click on the green triangle next to the `open` method to start the game. `Bloc-MemoryGame-Demo` contains a skeleton of the game that we will use in this tutorial.
+```
+MGGame withEmoji 
+```
+
+To get a 
+
+```
+MGGameElement openWithNumber
+```
 
 
 ## Game model insights
@@ -80,19 +97,18 @@ all communication is done via announcements. On the other hand, the graphic elem
 communicating directly with the model.
 
 In the remainder of this chapter, we describe the game model in detail. If you want to move directly to
-building graphical elements using Bloc, you can find this model in the package `Bloc-MemoryGame`.
+building graphical elements using Bloc, this model is fully defined in the package.
 
 
 ### Reviewing the card model
 
-
 Let us start with the card model: a card is an object holding a symbol to be displayed, a state representing whether it is flipped or not, and an announcer that emits state changes. This object could also be a subclass of Model which already provides announcer management. 
 
 ```
-Object << #MgdCardModel
+Object << #MGCardModel
 	slots: { #symbol . #flipped . #announcer};
 	tag: 'Model';
-	package: 'Bloc-MemoryGame'
+	package: 'Bloc-Memory'
 ```
 
 
@@ -100,28 +116,28 @@ Object << #MgdCardModel
 After creating the class we define an `initialize` method to set the card as not flipped, together with several accessors:
 
 ```
-MgdCardModel >> initialize
+MGCardModel >> initialize
 	super initialize.
 	flipped := false
 ```
 
 ```
-MgdCardModel >> symbol: aCharacter
+MGCardModel >> symbol: aCharacter
 	symbol := aCharacter
 ```
 
 ```
-MgdCardModel >> symbol
+MGCardModel >> symbol
 	^ symbol
 ```
 
 ```
-MgdCardModel >> isFlipped
+MGCardModel >> isFlipped
 	^ flipped
 ```
 
 ```
-MgdCardModel >> announcer
+MGCardModel >> announcer
 	^ announcer ifNil: [ announcer := Announcer new ]
 ```
 
@@ -132,14 +148,14 @@ MgdCardModel >> announcer
 Next we need two methods to flip a card and make it disappear when it is no longer needed in the game.
 
 ```
-MgdCardModel >> flip
+MGCardModel >> flip
 	flipped := flipped not.
 	self notifyFlipped
 ```
 
 
 ```
-MgdCardModel >> disappear
+MGCardModel >> disappear
 	self notifyDisappear
 ```
 
@@ -147,39 +163,39 @@ MgdCardModel >> disappear
 ### Adding notification
 
 The notification is implemented as follows in the `notifyFlipped` and `notifyDisappear` methods. 
-They simply announce events of type `MgdCardFlippedAnnouncement` and `MgdCardDisappearAnnouncement`. 
+They simply announce events of type `MGCardFlippedAnnouncement` and `MGCardDisappearAnnouncement`. 
 The graphical elements have to register subscriptions to these announcements as we will see later.
 
 ```
-MgdCardModel >> notifyFlipped
-	self announcer announce: MgdCardFlippedAnnouncement new
+MGCardModel >> notifyFlipped
+	self announcer announce: MGCardFlippedAnnouncement new
 ```
 
 
 ```
-MgdCardModel >> notifyDisappear
-	self announcer announce: MgdCardDisappearAnnouncement new
+MGCardModel >> notifyDisappear
+	self announcer announce: MGCardDisappearAnnouncement new
 ```
 
 
-Here, `MgdCardFlippedAnnouncement` and `MgdCardDisappearAnnouncement` are subclasses of `Announcement`.
+Here, `MGCardFlippedAnnouncement` and `MGCardDisappearAnnouncement` are subclasses of `Announcement`.
 
 ```
-Announcement << #MgdCardFlippedAnnouncement
-	package: 'Bloc-MemoryGame'
-```
-
-
-```
-Announcement << #MgdCardDisappearAnnouncement
-	package: 'Bloc-MemoryGame'
+Announcement << #MGCardFlippedAnnouncement
+	package: 'Bloc-Memory'
 ```
 
 
-We add one final method to print a card in a nicer way and we are done with the card model!
+```
+Announcement << #MGCardDisappearAnnouncement
+	package: 'Bloc-Memory'
+```
+
+
+We add one final method to print a card more nicely and we are done with the card model!
 
 ```
-MgdCardModel >> printOn: aStream
+MGCardModel >> printOn: aStream
 	aStream
 		nextPutAll: 'Card';
 		nextPut: Character space;
@@ -194,27 +210,30 @@ MgdCardModel >> printOn: aStream
 The game model is simple: it keeps track of all the available cards and all the cards currently selected by the player. 
 
 ```
-Object << #MgdGameModel
+Object << #MGGameModel
 	slots: { #availableCards . #chosenCards};
 	package: 'Bloc-MemoryGame-Demo-Model'
 ```
 
 
 The `initialize` method sets up two collections for the cards.
+
 ```
-MgdGameModel >> initialize
+MGGameModel >> initialize
 	super initialize.
 	availableCards := OrderedCollection new.
 	chosenCards := OrderedCollection new
 ```
 
 ```
-MgdGameModel >> availableCards
+MGGameModel >> availableCards
 	^ availableCards
 ```
 
+The `chosenCards` collection will hold at max two cards in this version of the game. 
+
 ```
-MgdGameModel >> chosenCards
+MGGameModel >> chosenCards
 	^ chosenCards
 ```
 
@@ -222,20 +241,24 @@ MgdGameModel >> chosenCards
 ### Grid size and card number
 
 For now, we'll hardcode the size of the grid and the number of cards that need to be matched by a player.
+Later this could be turned into an instance variable and be configured.
+
 ```
-MgdGameModel >> gridSize
+MGGameModel >> gridSize
 	"Return grid size"
 	^ 4
 ```
 
+The method `matchesCount` indicates that two identical cards are needed to match. 
+
 ```
-MgdGameModel >> matchesCount
+MGGameModel >> matchesCount
 	"How many chosen cards should match in order for them to disappear"
 	^ 2
 ```
 
 ```
-MgdGameModel >> cardsCount
+MGGameModel >> cardsCount
 	"Return how many cards there should be depending on grid size"
 	^ self gridSize * self gridSize
 ```
@@ -246,18 +269,25 @@ MgdGameModel >> cardsCount
 
 To initialize the game with cards, we add an `initializeForSymbols:` method. 
 This method creates a list of cards from a list of characters and shuffles it. 
-We also add an assertion in this method to verify that the caller provided enough characters.
+We also add an assertion in this method to verify that the caller provided enough characters to fill up the game board.
 
 ```
-MgdGameModel >> initializeForSymbols: characters
-	aCollectionOfCharacters size = (self cardsCount / self matchesCount)		ifFalse: [ self error: 'Amount of characters must be equal to possible all combinations' ].	aCollectionOfCharacters do: [ :aSymbol |		1 to: self matchesCount do: [ :i |		availableCards add: (MGCard new symbol: aSymbol) ] ].	availableCards := availableCards shuffled
+MGGameModel >> initializeForSymbols: characters
+
+	aCollectionOfCharacters size = (self cardsCount / self matchesCount)
+		ifFalse: [ self error: 'Amount of characters must be equal to possible all combinations' ].
+
+	aCollectionOfCharacters do: [ :aSymbol |
+		1 to: self matchesCount do: [ :i |
+		availableCards add: (MGCard new symbol: aSymbol) ] ].
+	availableCards := availableCards shuffled
 ```
 
 
 ### Game logic
 
 Next, we define the method `chooseCard:`. It will be called when a user selects a card. 
-This method is actually the most complex method of the model and implements the main
+This method is the most complex method of the model and implements the main
 logic of the game. 
 
 - First, the method makes sure that the chosen card is not already selected.
@@ -266,7 +296,7 @@ This could happen if the view uses animations that give the player the chance to
 - Finally, depending on the actual state of the game, the step is complete and the selected cards are either removed or flipped back.
 
 ```
-MgdGameModel >> chooseCard: aCard
+MGGameModel >> chooseCard: aCard
 	(self chosenCards includes: aCard) 
 		ifTrue: [ ^ self ].
 	self chosenCards add: aCard.
@@ -283,21 +313,22 @@ The current step is completed if the player selects the right amount of cards an
 In this case, all selected cards receive the message `disappear` and are removed from the list of selected cards.
 
 ```
-MgdGameModel >> shouldCompleteStep
+MGGameModel >> shouldCompleteStep
 	^ self chosenCards size = self matchesCount 
 		and: [ self chosenCardMatch ]
 ```
 
 ```
-MgdGameModel >> chosenCardMatch
+MGGameModel >> chosenCardMatch
 	| firstCard |
 	firstCard := self chosenCards first.
 	^ self chosenCards allSatisfy: [ :aCard | 
 		aCard isFlipped and: [ firstCard symbol = aCard symbol ] ]
 ```
+Note that the logic of chosenCardMatch looks more complex than expected but it works with matches that require more than two cards. 
 
 ```
-MgdGameModel >> completeStep
+MGGameModel >> completeStep
 	self chosenCards 
 		do: [ :aCard | aCard disappear ];
 		removeAll.
@@ -311,12 +342,12 @@ selected two cards that do not match and clicks on a third one. In this situatio
 flipped back. The list of selected cards will only contain the third card.
 
 ```
-MgdGameModel >> shouldResetStep 
+MGGameModel >> shouldResetStep 
 	^ self chosenCards size > self matchesCount
 ```
 
 ```
-MgdGameModel >> resetStep
+MGGameModel >> resetStep
 	| lastCard |
 	lastCard := self chosenCards  last.
 	self chosenCards 
