@@ -65,7 +65,7 @@ MGCardElement new
 ```
 
 
-![A first extremely basic representation of face down card.](figures/Inspecting0.png width=60&label=figInspecting0)
+![A first extremely basic representation of face down card.](figures/Inspecting1.png width=60&label=figInspecting1)
 
 ### Improving the card visual 
 
