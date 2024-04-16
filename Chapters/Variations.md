@@ -17,6 +17,14 @@ BlElement << #MGCardElement
 ```
 
 
+The message `backgroundPaint` will be used later to customize the background of our card element.
+Let us define a nice color. 
+
+```
+MGCardElement >> backgroundPaint
+	^ Color lightGray
+```
+
 
 We define the corresponding accessors since the setter methods will be the place to hook registration for the communication 
 between the model and the view, as we will show later.
@@ -29,19 +37,6 @@ MGCardElement >> card
 ```
 MGCardElement >> card: aMgCard
 	card := aMgCard
-```
-
-
-The message `backgroundPaint` will be used later to customize the background of our card element.
-Let us define a nice color. 
-
-```
-MGCardElement >> backgroundPaint
-	"Return a BlPaint that should be used as a background (fill)
-	of both back and face sides of the card. Colors are polymorphic
-	with BlPaint and therefore can be used too."
-	
-	^ Color pink darker
 ```
 
 
@@ -120,7 +115,12 @@ You should get then a visual representation close to the one shown in Figure *@f
 We can change the color of the background by changing the definition of the method `backgroundPaint`
 
 ```
-
+backgroundPaint
+	"Return a BlPaint that should be used as a background (fill)
+	of both back and face sides of the card. Colors are polymorphic
+	with BlPaint and therefore can be used too."
+	
+	^ Color pink darker
 ```
 
 
@@ -454,11 +454,53 @@ MGCardElement >> drawCardElement
 
 Now we are ready to implement the backside and flipped side
 
- We will add another instance variable holding our back side so that the lines are created only once during initialization. Our solution is defined as follows: 
+### Adding a cross
+
+
+Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should use the `BlLineGeometry`. At the end, we will create two lines and therefore two elements with a line geometry that will be added as children of the card Element.
+
+Bloc uses parent-child relations between its elements thus leaving us with trees of elements where each node is an element, connected to a single parent and with zero to many children
+
+A line is obviously defined between two points, we then need to give two points as parameters of the `from:to:` message from the `BlLineGeometry` class. 
+Lines created using BlLineGeometry are a bit special as considered as "open geometries" meaning we don't define their color with the usual `background:` message like any other `BlElement`. Instead, we define a border for our line and give this border the color we wanted (here we chose light green), we also define the thickness of our line with the border's width.
+Another particularity of open geometries is that they don't fit well with default outskirts in the current version of Bloc, this is why we redefine them to be centered 
+
+```
+MGCardElement >> initializeFirstLine
+
+	| line |
+	line := BlElement new
+		        border: (BlBorder paint: Color lightGreen width: 3);
+			geometry: BlLineGeometry new;
+		        outskirts: BlOutskirts centered.
+	line
+		when: BlElementLayoutComputedEvent
+		do: [ :e | line geometry from: 0 @ 0 to: line parent extent ].
+	^ line
+```
+The message `when:do:` is used here to wait for the line parent to be drawn for the line to be defined, otherwise the `line parent extent` will be 0@0 and our line will not be displayed. 
+
+We can redefine `drawBackSide` and add the line we just created.
+
+```
+MGCardElement >> drawBackSide
+
+	self addChild: self initializeFirstLine.
+	^ self
+```
+
+Once this method is defined, refresh the inspector and you should get a card as in Figure *@figOneLine@*.
+
+![A rounded card with half of the cross.](figures/CardOneLine.png width=60&label=figOneLine)
+
+### Full cross
+
+
+Now we can add the second line to build a full cross. We will add another instance variable holding our back side so that the lines are created only once during initialization. Our solution is defined as follows: 
 
 ```
 BlElement << #MGCardElement
-	slots: { #card . #backSide };
+	slots: { #card #backSide };
 	package: 'Bloc-Memory'
 ```
 ```
@@ -466,7 +508,41 @@ MGCardElement >> backSide: aBlElement
 	backside := aBlElement
 ```
 
-Before creating the getter of backside, we will create the method that will be responsible for adding the two lines together as a cross `initializeBackSide`. 
+Before creating the getter of backside, we will create the method that will be responsible for adding the two lines together as a cross `initializeBackSide`. Let's start by creating the second line the same way we created the first one.
+
+
+```
+MGCardElement >> initializeSecondLine
+
+	| line |
+	line := BlElement new
+		        border: (BlBorder paint: Color lightGreen width: 3);
+			geometry: BlLineGeometry new;
+		        outskirts: BlOutskirts centered.
+	line when: BlElementLayoutComputedEvent do: [ :e |
+		line geometry from: 0 @ line parent height to: line parent width @ 0 ].
+	^ line
+```
+```
+MGCardElement >> initializeBackSide
+
+	| firstLine secondLine cross |
+	firstLine := self initializeFirstLine.
+	secondLine := self initializeSecondLine.
+
+	cross := BlElement new
+		         addChildren: {
+				         firstLine.
+				         secondLine };
+		         constraintsDo: [ :c |
+			         c horizontal matchParent.
+			         c vertical matchParent ].
+
+	^ cross
+```
+
+Our backside is then an Element holding both lines, we tell this element to match its parent using constraints, meaning the element size will scale according to the parent size, this also makes our lines defined to the correct points. 
+
 We can now define the `backSide` getter but with a little twist, using lazy initialization. This will create our element only when accessed the first time and not right after the initialization of the card element. This concept is very useful in certain situations and is great to know in case you need it, we define it as such :
 
 
@@ -496,43 +572,12 @@ MGCardElement >> initialize
 ```
 
 
-![UPDATE A card with a complete backside.](figures/CardCross.png width=60&label=figCardCross)
+![A card with a complete backside.](figures/CardCross.png width=60&label=figCardCross)
 
 Now our backside is fully implemented and when you refresh your view, you should get the card 
 as shown in Figure *@figCardCross@*. 
 
 
-### Resources
-
-If you want to use your own pngs, have a look at the class `ReaderWriterPNG` that converts PNG files into Forms. A form is a piece of graphical memory.
-
-If you want to manage forms as the method cardbackForm provided in the project, you can have a look 
-at the IconFactory project on github. 
-
-```
-Metacello new
-    baseline: #IconFactory;
-    repository: 'github://pharo-graphics/IconFactory';
-    load
-``` 
-
-This project supports the definition of form as textual resources in methods that can be then versioned altogether with the code. 
-
-Given a base64 encoded string you can get a form with the following expression, here we take the base64 encoded string from `IconFactoryTest new exampleIconContents`
-
-```
-Form fromBinaryStream: IconFactoryTest new exampleIconContents base64Decoded asByteArray readStream
-```
-
-Following this you can generate a method body with a cache (here named icons) as follows: 
-
-```
-iconMethodTemplate	^ '{1}	"Private - Generated method"	^ self icons		at: #{1}		ifAbsentPut: [ Form fromBinaryStream: IconFactoryTest new exampleIconContents
-					 base64Decoded asByteArray readStream ]'
-```
-Where the first argument is part of a method name for example 'tintin'.
-
-### Conclusion
 
 
 
