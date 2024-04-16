@@ -1,17 +1,18 @@
-## Building card graphical elements
-
+## Basic building card graphical elements
 
 In this chapter, we will build the visual appearance of the cards step by step.
-In Bloc, visual objects are called elements, which are usually subclasses of `BlElement`, the inheritance tree root. In subsequent chapters, we will do the same for the game and add interaction using event listeners.
+In Bloc, visual objects are called elements, which are usually subclasses of `BlElement`, the inheritance tree root. In subsequent chapters, we will add interaction using event listeners.
+
+
 
 ### First: the card element
 
 Our graphic element representing a card will be a subclass of the `BlElement` which has a reference to a card model.
 
 ```
-BlElement << #MgdRawCardElement
+BlElement << #MGCardElement
 	slots: { #card };
-	package: 'Bloc-MemoryGame'
+	package: 'Bloc-Memory'
 ```
 
 
@@ -19,7 +20,7 @@ The message `backgroundPaint` will be used later to customize the background of 
 Let us define a nice color. 
 
 ```
-MgdRawCardElement >> backgroundPaint
+MGCardElement >> backgroundPaint
 	^ Color lightGray
 ```
 
@@ -27,13 +28,13 @@ MgdRawCardElement >> backgroundPaint
 We mentioned the accessors since the setter will be a place to hook registration for the communication between the model and the view.
 
 ```
-MgdRawCardElement >> card
+MGCardElement >> card
 	^ card
 ```
 
 
 ```
-MgdRawCardElement >> card: aMgCard
+MGCardElement >> card: aMgCard
 	card := aMgCard
 ```
 
@@ -41,7 +42,7 @@ MgdRawCardElement >> card: aMgCard
 We define a method `initialize` to set the size and the default color as well as a card model object.
 
 ```
-MgdRawCardElement >> initialize
+MGCardElement >> initialize
 	super initialize.
 	self size: 80 @ 80.
 	self background: self backgroundPaint.
@@ -51,11 +52,10 @@ MgdRawCardElement >> initialize
 
 ### Starting to draw a card
 
-
 In Bloc, BlElements draw themselves onto the integrated canvas of the inspector as we inspect them, take a look at our element by executing this:
 
 ```
-MgdRawCardElement new
+MGCardElement new
 ```
 
 
@@ -65,18 +65,19 @@ MgdRawCardElement new
 
 
 Instead of displaying a full rectangle, we want a better visual. 
-Bloc let us decide the geometry we want to give to our elements, it could be a circle, a triangle or a rounded rectangle for example, you can check avaible geometries by looking at subclasses of `BlElementGeometry`.
+Bloc lets us decide the geometry we want to give to our elements, it could be a circle, a triangle or a rounded rectangle for example, you can check available geometries by looking at subclasses of `BlElementGeometry`.
+We can also add a png as we will show later.
 
 We can start giving a circle shape to our element, we will need to use the `geometry:` message and give a `BlCircleGeometry` as a parameter.
 
 ```
-MgdRawCardElement >> initialize
+MGCardElement >> initialize
 
 	super initialize.
 	self size: 80 @ 80.
 	self background: self backgroundPaint.
 	self geometry: BlCircleGeometry new.
-	self card: (MgdCardModel new symbol: $a)
+	self card: (MGCard new symbol: $a)
 ```
 
 
@@ -86,15 +87,15 @@ However, we don't want the card to be a circle either. Ideally, it should be a r
 
 
 ```
-MgdRawCardElement >> cornerRadius
-	^ 10
+MGCardElement >> cornerRadius
+	^ 12
 ```
 
 
-We would like to have a rounded rectangle so we use the `BlRoundedRectangleGeometry` class. However, we need to give the corner radius we just defined as a parameter of the `cornerRadius:` class message :
+We would like to have a rounded rectangle so we use the `BlRoundedRectangleGeometry` class. However, we need to give the corner radius we just defined as a parameter of the `cornerRadius:` class message:
 
 ```
-MgdRawCardElement >> initialize
+MGCardElement >> initialize
 
 	super initialize.
 	self size: 80 @ 80.
@@ -110,6 +111,22 @@ You should get then a visual representation close to the one shown in Figure *@f
 ![A rounded card.](figures/CardRounded.png width=60&label=figrounded)
 
 
+We can change the color of the background by changing the definition of the method `backgroundPaint`
+
+```
+backgroundPaint	"Return a BlPaint that should be used as a background (fill)	of both back and face sides of the card. Color is polymorphic	with BlPaint and therefore can be used too."		^ Color pink darker
+```
+
+
+
+## Revisiting the look 
+
+To display the different faces of a visual element we will 
+
+ consists in placing other blElements as children of the one representing for example a card. 
+This approach means that dynamically we will add and remove blElements. 
+
+
 
 ### Preparing flipping
 
@@ -117,13 +134,13 @@ You should get then a visual representation close to the one shown in Figure *@f
 We define now two methods 
 
 ```
-MgdRawCardElement >> drawBackside
+MGCardElement >> drawBackside
 	"nothing for now"
 ```
 
 
 ```
-MgdRawCardElement >> drawFlippedSide
+MGCardElement >> drawFlippedSide
 	"nothing for now"
 ```
 
@@ -131,7 +148,7 @@ MgdRawCardElement >> drawFlippedSide
 We can now define the method that will draw our card 
 
 ```
-MgdRawCardElement >> drawCardElement
+MGCardElement >> drawCardElement
 
 	self card isFlipped
 		  ifTrue: [ self drawFlippedSide ]
@@ -146,14 +163,14 @@ Now we are ready to implement the backside and flipped side
 
 Now we are ready to define the backside of our card. We will start by drawing a line. To draw a line we should use the `BlLineGeometry`. At the end, we will create two lines and therefore two elements with a line geometry that will be added as children of the card Element.
 
-> Bloc uses parent-child relations between its elements thus leaving us with trees of elements where each node is an element, connected to a single parent and with zero to many children
+Bloc uses parent-child relations between its elements thus leaving us with trees of elements where each node is an element, connected to a single parent and with zero to many children
 
 A line is obviously defined between two points, we then need to give two points as parameters of the `from:to:` message from the `BlLineGeometry` class. 
-Lines created using BlLineGeometry are a bit special as considered as "open geometries" meaning we don't define their color with the usual `background:` message like any other `BlElement`. Instead we define a border for our line and give this border the color we wanted (here we chose light green), we also define the thickness of our line with the border's width.
-Another particularity of open geometries is that they don't fit well with default outskirts in the current verision of Bloc, this is why we redefine them to be centered 
+Lines created using BlLineGeometry are a bit special as considered as "open geometries" meaning we don't define their color with the usual `background:` message like any other `BlElement`. Instead, we define a border for our line and give this border the color we wanted (here we chose light green), we also define the thickness of our line with the border's width.
+Another particularity of open geometries is that they don't fit well with default outskirts in the current version of Bloc, this is why we redefine them to be centered 
 
 ```
-MgdRawCardElement >> initializeFirstLine
+MGCardElement >> initializeFirstLine
 
 	| line |
 	line := BlElement new
@@ -170,7 +187,7 @@ The message `when:do:` is used here to wait for the line parent to be drawn for 
 We can redefine `drawBackSide` and add the line we just created.
 
 ```
-MgdRawCardElement >> drawBackSide
+MGCardElement >> drawBackSide
 
 	self addChild: self initializeFirstLine.
 	^ self
@@ -186,12 +203,12 @@ Once this method is defined, refresh the inspector and you should get a card as 
 Now we can add the second line to build a full cross. We will add another instance variable holding our back side so that the lines are created only once during initialization. Our solution is defined as follows: 
 
 ```
-BlElement << #MgdRawCardElement
+BlElement << #MGCardElement
 	slots: { #card #backSide };
-	package: 'Bloc-MemoryGame'
+	package: 'Bloc-Memory'
 ```
 ```
-MgdRawCardElement >> backSide: aBlElement
+MGCardElement >> backSide: aBlElement
 	backside := aBlElement
 ```
 
@@ -199,7 +216,7 @@ Before creating the getter of backside, we will create the method that will be r
 
 
 ```
-MgdRawCardElement >> initializeSecondLine
+MGCardElement >> initializeSecondLine
 
 	| line |
 	line := BlElement new
@@ -211,7 +228,7 @@ MgdRawCardElement >> initializeSecondLine
 	^ line
 ```
 ```
-MgdRawCardElement >> initializeBackSide
+MGCardElement >> initializeBackSide
 
 	| firstLine secondLine cross |
 	firstLine := self initializeFirstLine.
@@ -230,31 +247,31 @@ MgdRawCardElement >> initializeBackSide
 
 Our backside is then an Element holding both lines, we tell this element to match its parent using constraints, meaning the element size will scale according to the parent size, this also makes our lines defined to the correct points. 
 
-We can now define the backSide getter but with a little twist, using lazy initialization. This will create our element only when accessed the first time and not right after the initialization of the card element. This concept is very useful in certain situations and is great to know in case you need it, we define it as such :
+We can now define the `backSide` getter but with a little twist, using lazy initialization. This will create our element only when accessed the first time and not right after the initialization of the card element. This concept is very useful in certain situations and is great to know in case you need it, we define it as such :
 
 
 ```
-MgdRawCardElement >> backSide
+MGCardElement >> backSide
 	^ backSide ifNil: [ self initializeBackSide ]
 ```
 
 We can finally redefine `drawBackSide` and call it in our initialization to draw our backside when the card is created. 
 
 ```
-MgdRawCardElement >> drawBackSide
+MGCardElement >> drawBackSide
 	self removeChildren.
 	self addChild: self backSide
 ```
 
 ```
-MgdRawCardElement >> initialize
+MGCardElement >> initialize
 
 	super initialize.
 	self size: 80 @ 80.
 	self background: self backgroundPaint.
 	self geometry:
 		(BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
-	self card: (MgdCardModel new symbol: $a).
+	self card: (MGCard new symbol: $a).
 	self drawCardElement.
 ```
 
@@ -272,7 +289,7 @@ recreate a new card  as follows:
 
 ```
 | cardElement | 
-cardElement := MgdRawCardElement new.
+cardElement := MGCardElement new.
 cardElement card flip.
 cardElement
 ```
@@ -287,15 +304,15 @@ Let us redefine `drawFlippedSide` as follows:
 - First, we create a text element that holds the symbol of the card, we also give properties to this text by changing the font of the text but also its size and its color.
 - Then we add the text element as a child of our card element
 
-We will add an instance variable 'flippedSide' to our `MgdRawCardElement` class so that we create the text only once during the initialization. We don't forget about getter and setter.
+We will add an instance variable 'flippedSide' to our `MGCardElement` class so that we create the text only once during the initialization. We don't forget about getter and setter.
 
 ```
-BlElement << #MgdRawCardElement
-	slots: { #card #backSide #flippedSide };
-	package: 'Bloc-MemoryGame'
+BlElement << #MGCardElement
+	slots: { #card . #backSide . #flippedSide };
+	package: 'Bloc-Memory'
 ```
 ```
-MgdRawCardElement >> flippedSide
+MGCardElement >> flippedSide
 
 	^ flippedSide ifNil: [ self initializeFlippedSide ]
 ```
@@ -303,7 +320,7 @@ MgdRawCardElement >> flippedSide
 We can now create the method that will create the text for the flipped side, this method will be called during initialization.
 
 ```
-MgdRawCardElement >> initializeFlippedSide
+MGCardElement >> initializeFlippedSide
 
 	| elt |
 	elt := BlTextElement new text: self card symbol asRopedText.
@@ -316,7 +333,7 @@ MgdRawCardElement >> initializeFlippedSide
 Now we can redefine `drawFlippedSide` to add our text element as a child of our card element
 
 ```
-MgdRawCardElement >> drawFlippedSide
+MGCardElement >> drawFlippedSide
 
 	self removeChildren.
 	self addChild: self flippedSide
@@ -327,18 +344,18 @@ When we refresh the display we can see the letter 'a' appear but it is positione
 
 ![Not centered letter.](figures/CardNotCentered.png width=60&label=figCardNotCentered)
 
-Let's change that !
+Let's change that!
 We will have to use constraints on our text element to tell him to get aligned in the center of its parent. To achieve this goal, we need to define a layout on the parent which is our card Element. We will use a Frame Layout that acts just like a real frame, meaning the text element will be able to get centered into the frame of its parent. Let's add the frame layout in the initialization of the card Element.
 
 ```
-MgdRawCardElement >> initialize
+MGCardElement >> initialize
 
 	super initialize.
 	self size: 80 @ 80.
 	self background: self backgroundPaint.
 	self geometry:
 		(BlRoundedRectangleGeometry cornerRadius: self cornerRadius).
-	self card: (MgdCardModel new symbol: $a).
+	self card: (MGCardModel new symbol: $a).
 	self drawCardElement.
 	self layout: BlFrameLayout new.
 ```
@@ -346,7 +363,7 @@ MgdRawCardElement >> initialize
 We can now add the constraints to the text element.
 
 ```
-MgdRawCardElement >> initializeFlippedSide
+MGCardElement >> initializeFlippedSide
 
 	| elt |
 	elt := BlTextElement new text: self card symbol asRopedText.
@@ -375,19 +392,19 @@ Basically, we will define a new element subclass and set its layout.
 Here is a typical scenario to create the game: we create a model and its view and we assign the model as the view's model.
 
 ```
-game := MgdGameModel numbers.
-grid := MgdGameElement new.
+game := MGGame numbers.
+grid := MGGameElement new.
 grid memoryGame: game. 
 ```
 
 
 ### The GameElement class
 
-Let us define the class `MgdGameElement` that will represent the game board. 
-As for the `MgdRawCardElement`, it inherits from the `BlElement` class. 
+Let us define the class `MGGameElement` that will represent the game board. 
+As for the `MGCardElement`, it inherits from the `BlElement` class. 
 This view object holds a reference to the game model.
 ```
-BlElement << #MgdGameElement
+BlElement << #MGGameElement
 	slots: { #memoryGame };
 	package: 'Bloc-MemoryGame'
 ```
@@ -397,21 +414,22 @@ We define the `memoryGame:` setter method. We will extend it to create
 all the card elements shortly. 
 
 ```
-MgdGameElement >> memoryGame: aMgdGameModel
+MGGameElement >> memoryGame: aMgdGameModel
 	memoryGame := aMgdGameModel
 ```
 
 
 ```
-MgdGameElement >> memoryGame
+MGGameElement >> memoryGame
 	^ memoryGame
 ```
 
 
 During the object initialization, we set the layout \(i.e., how sub-elements are placed inside their container\).
 Here we define the layout to be a grid layout and we set it as horizontal.
+
 ```
-MgdGameElement >> initialize
+MGGameElement >> initialize
 	super initialize.
  	self background: Color veryLightGray.
 	self layout: BlGridLayout horizontal.
@@ -431,12 +449,12 @@ Note in particular that we add all the card graphical elements as children of th
 MgdGameElement >> memoryGame: aGameModel
 	memoryGame := aGameModel.
 	memoryGame availableCards
-		do: [ :aCard | self addChild: (MgdRawCardElement card: aCard) ]
+		do: [ :aCard | self addChild: (MGCardElement card: aCard) ]
 ```
 
 
 ```
-MgdRawCardElement class >> card: aCard 
+MGCardElement class >> card: aCard 
 	^ self new card: aCard
 ```
 
@@ -479,7 +497,7 @@ We modify the `memoryGame:` method to set the number of columns
 that the layout should handle. 
 
 ```
-MgdGameElement >> memoryGame: aGameModel
+MGGameElement >> memoryGame: aGameModel
 	memoryGame := aGameModel.
 	self layout columnCount: memoryGame gridSize.
 	memoryGame availableCards
@@ -503,7 +521,7 @@ Note that a background is not necessarily a color but that color is polymorphic 
 , therefore, the expression `background: Color gray darker` is equivalent to `background: (BlBackground paint: Color gray darker)`.
 
 ```
-MgdGameElement >> initialize
+MGGameElement >> initialize
 	super initialize.
 	self background: (BlBackground paint: Color gray darker).
 	self layout: (BlGridLayout horizontal cellSpacing: 20).
@@ -520,11 +538,11 @@ Once this method is changed, you should get a situation similar to the one descr
 Before adding interaction let's define a method `openWith:` that will open our game element with a given model.
 
 ```
-MgdGameElement class >> openWith: aMgdGameModel
+MGGameElement class >> openWith: aMGGame
 
 	| space gameElement |
 	space := BlSpace new.
-	gameElement := self new memoryGame: aMgdGameModel.
+	gameElement := self new memoryGame: aMGGame.
 	space root addChild: gameElement.
  
 	space show
@@ -533,11 +551,11 @@ MgdGameElement class >> openWith: aMgdGameModel
 If we try to open this, we see our game element with all its cards but there's still some blank space around it, we can deal with this by changing the size of the space we put our game element into.
 
 ```
-MgdGameElement class >> openWith: aMgdGameModel
+MGGameElement class >> openWith: aMGGame
 
 	| space gameElement |
 	space := BlSpace new.
-	gameElement := self new memoryGame: aMgdGameModel.
+	gameElement := self new memoryGame: aMGGame.
 	space root addChild: gameElement.
  	space pulse.
   	space extent: gameElement extent.

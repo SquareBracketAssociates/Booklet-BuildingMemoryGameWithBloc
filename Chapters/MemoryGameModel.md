@@ -183,12 +183,14 @@ Here, `MGCardFlippedAnnouncement` and `MGCardDisappearAnnouncement` are subclass
 
 ```
 Announcement << #MGCardFlippedAnnouncement
+	tag: 'Events';
 	package: 'Bloc-Memory'
 ```
 
 
 ```
 Announcement << #MGCardDisappearAnnouncement
+	tag: 'Events';
 	package: 'Bloc-Memory'
 ```
 
@@ -213,7 +215,8 @@ The game model is simple: it keeps track of all the available cards and all the 
 ```
 Object << #MGGame
 	slots: { #availableCards . #chosenCards};
-	package: 'Bloc-MemoryGame-Demo-Model'
+	tag: 'Model';
+	package: 'Bloc-MemoryGame'
 ```
 
 
@@ -254,7 +257,7 @@ The method `matchesCount` indicates that two identical cards are needed to match
 
 ```
 MGGame >> matchesCount
-	"How many chosen cards should match in order for them to disappear"
+	"How many chosen cards should match for them to disappear"
 	^ 2
 ```
 
