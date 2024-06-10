@@ -45,24 +45,7 @@ space show
 
 ### Getting started
 
-
 This tutorial is for Pharo 11.0 \(`https://pharo.org/download`\) running on the latest compatible Virtual machine. You can get them at the following address: `http://www.pharo.org/`
-
-To load Bloc, execute the following snippet in a Pharo Playground:
-
-```
-[ Metacello new
-	baseline: 'Bloc';
-	repository: 'github://pharo-graphics/Bloc:master/src';
-	onConflictUseIncoming;
-	ignoreImage;
-	load ]
-		on: MCMergeOrLoadWarning
-		do: [ :warning | warning load ]
-```
-
-
-### Loading the Memory Game
 
 To make the demo easier to follow and help you if you get lost, we already made a full implementation of the game. You can load it using the following code:
 
@@ -194,17 +177,16 @@ Announcement << #MGCardDisappearAnnouncement
 	package: 'Bloc-Memory'
 ```
 
-
-We add one final method to print a card more nicely and we are done with the card model!
+We add one final method to display a card more nicely in the inspector and we are done with the card model!
 
 ```
-MGCard >> printOn: aStream
-	aStream
-		nextPutAll: 'Card';
-		nextPut: Character space;
-		nextPut: $(;
-		nextPut: self symbol;
-		nextPut: $)
+MGCard >> inspectCard: aBuilder
+	<inspectorPresentationOrder: 1 title: 'card'>
+	| builder |
+	builder := StSimpleInspectorBuilder on: aBuilder.
+	builder key: 'card:' value: self symbol.
+
+	^ builder table
 ```
 
 
